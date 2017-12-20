@@ -47,7 +47,7 @@ export default class Generator
                     this.generateVersions(versions.slice(1))
                 })
                 .catch(error => {
-                    console.log("\x1b[31m", `\n\n  Error: ${error}\n\n`);
+                    console.log("\x1b[31m", `\n\n  Error generating ${version}: ${error}\n\n`);
                     if (error.stack) {
                         console.error(error.stack);
                     }
@@ -249,6 +249,13 @@ export default class Generator
             var path = this.config.output.exportsPath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
             var content = `export default ${symbol.name};`
     
+            this.createFile(path, content);
+        }
+        else if (symbol.kind === "enum")
+        {
+            var path = this.config.output.exportsPath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
+            var content = `export default ${symbol.name};`
+            
             this.createFile(path, content);
         }
     }
