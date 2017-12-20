@@ -18,9 +18,13 @@
         "url": "https://github.com/lmcarreiro/ui5ts/issues"
     },
     "devDependencies": {
+        "@types/fs-extra": "^5.0.0",
         "@types/jquery": "^2.0.47",
+        "@types/json5": "0.0.29",
         "@types/node": "^8.0.33",
         "@types/request": "^2.0.4",
+        "fs-extra": "^5.0.0",
+        "json5": "^0.5.1",
         "request": "^2.83.0",
         "typescript": "^2.7.0-dev.20171031"
     },

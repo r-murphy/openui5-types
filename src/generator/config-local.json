@@ -1,4 +1,4 @@
 {
-    "runLocal": false,
-    "path": "G:/sapui5-sdk-1.48.6/test-resources"
+    "runLocal": true,
+    "path": "test-resources/{{VERSION}}"
 }

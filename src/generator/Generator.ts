@@ -1,9 +1,14 @@
 import * as request             from 'request';
 import * as fs                  from 'fs';
+import * as fse                 from 'fs-extra';
+import * as Path                from 'path';
+import * as JSON5               from 'json5';
 import * as ui5                 from './ui5api';
 import TreeNode                 from './nodeTypes/base/TreeNode';
 import TreeBuilder              from './nodeTypes/base/TreeBuilder';
 import Config, { LocalConfig }  from './GeneratorConfig';
+
+const versionMarker = "{{VERSION}}";
 
 export default class Generator
 {
@@ -14,8 +19,8 @@ export default class Generator
         var jsonConfig      = fs.readFileSync(configPath, { encoding: "utf-8" });
         var localJsonConfig = fs.readFileSync(localConfigPath, { encoding: "utf-8" });
 
-        this.config      = JSON.parse(jsonConfig);
-        this.localConfig = JSON.parse(localJsonConfig);
+        this.config      = JSON5.parse(jsonConfig);
+        this.localConfig = JSON5.parse(localJsonConfig);
     }
 
     public generate(): void
@@ -43,27 +48,43 @@ export default class Generator
                 })
                 .catch(error => {
                     console.log("\x1b[31m", `\n\n  Error: ${error}\n\n`);
+                    if (error.stack) {
+                        console.error(error.stack);
+                    }
                     process.exit(1);
                 });
         }
     }
     
-    private getApiJson(namespace: string, version: string): Promise<ui5.API>
+    private async getApiJson(namespace: string, version: string): Promise<ui5.API>
     {
-        const versionMarker = "{{VERSION}}";
-
         if (this.localConfig.runLocal) {
             let path = `${this.localConfig.path}/${namespace}/${this.config.input.jsonLocation}`
-                .replace(/\//g, "\\")
+                .replace(/\//g, Path.sep)
                 .replace(versionMarker, version);
 
-            console.log(`Making local file '${path}'`);
+            if (!(fs.existsSync(path))) {
+
+                console.log(`Making local file '${path}'`);
+
+                let api = await this.getServerApiJson(namespace, version);
+
+                fse.ensureFileSync(path);
+
+                fse.writeJson(path, api, {
+                    spaces: this.config.output.indentation
+                });
+                
+                return api;
+            }
+            
+            console.log(`Reading local file '${path}'`);
 
             return new Promise((resolve: (api: ui5.API) => void, reject: (error: any) => void) => {
                 fs.readFile(path, { encoding: "utf-8" }, (err, data) => {
                     if (!err) {
                         console.log(`Got content from '${path}'`);
-                        resolve(JSON.parse(data))
+                        resolve(JSON5.parse(data))
                     }
                     else {
                         console.log(`Got error from '${path}'`);
@@ -73,24 +94,28 @@ export default class Generator
             });
         }
         else {
-            let url = `${this.config.input.apiBaseUrl}/${namespace}/${this.config.input.jsonLocation}`
-                .replace(versionMarker, version);
-            
-            console.log(`Making request to '${url}'`);
-
-            return new Promise((resolve: (api: ui5.API) => void, reject: (error: any) => void) => {
-                request({ url: url, json: true }, (error, response, body) => {
-                    if (!error && response && response.statusCode === 200) {
-                        console.log(`Got response from '${url}'`);
-                        resolve(response.body);
-                    }
-                    else {
-                        console.log(`Got error from '${url}'`);
-                        reject(`${response.statusCode} - ${response.statusMessage}`);
-                    }
-                });
-            });
+            return this.getServerApiJson(namespace, version);
         }
+    }
+
+    private async getServerApiJson(namespace: string, version: string): Promise<ui5.API> {
+        let url = `${this.config.input.apiBaseUrl}/${namespace}/${this.config.input.jsonLocation}`
+            .replace(versionMarker, version);
+        
+        console.log(`Making request to '${url}'`);
+
+        return new Promise((resolve: (api: ui5.API) => void, reject: (error: any) => void) => {
+            request({ url: url, json: true }, (error, response, body) => {
+                if (!error && response && response.statusCode === 200) {
+                    console.log(`Got response from '${url}'`);
+                    resolve(response.body);
+                }
+                else {
+                    console.log(`Got error from '${url}'`);
+                    reject(`${response.statusCode} - ${response.statusMessage}`);
+                }
+            });
+        });
     }
     
     private execute(apiList: ui5.API[], version: string): void
@@ -251,4 +276,3 @@ export default class Generator
         });
     }
 }
-
