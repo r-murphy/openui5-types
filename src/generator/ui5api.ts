@@ -4,13 +4,14 @@ export interface API {
     version: string;
 }
 
-export type Symbol = SymbolNamespace|SymbolClass|SymbolEnum|SymbolInterface;
+export type Symbol = SymbolNamespace|SymbolClass|SymbolEnum|SymbolInterface|SymbolTypedef;
 
 export enum Kind {
     Namespace   = "namespace",
     Class       = "class",
     Enum        = "enum",
-    Interface   = "interface"
+    Interface   = "interface",
+    Typedef     = "typedef"
 }
 
 export enum Visibility {
@@ -78,7 +79,7 @@ export interface SymbolClass {
     methods?: Method[];
     properties?: Property[];
 
-    constructor: ClassContructor;
+    constructor: ClassConstructor;
     abstract?: boolean;// all true
     extends?: string;
     implements?: string[];
@@ -135,7 +136,21 @@ export interface SymbolInterface {
     experimental?: ExperimentalInfo;
 }
 
-export interface ClassContructor {
+export interface SymbolTypedef {
+    kind: Kind.Typedef;
+
+    name: string;
+    basename: string;
+
+    resource: string;
+    module: string;
+    export?: string;
+    static?: boolean;
+    visibility: Visibility;
+    description: string;
+}
+
+export interface ClassConstructor {
     visibility: Visibility;
 
     description?: string;
