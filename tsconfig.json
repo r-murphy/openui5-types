@@ -10,5 +10,8 @@
         "noImplicitReturns": true,
         "noImplicitThis": true,
         "sourceMap": true
-    }
+    },
+    "exclude": [
+        "./types"
+    ]
 }

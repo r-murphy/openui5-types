@@ -1,16 +1,16 @@
 {
     "output": {
-        "exportsPath":      "./exports/",
-        "definitionsPath":  "./ui5-types/",
+        "exportsPath":      "./dist/exports/",
+        "definitionsPath":  "./dist/types/",
         "indentation":      "    "
     },
     "input": {
         "apiBaseUrl":   "https://sapui5.hana.ondemand.com/{{VERSION}}/test-resources",
         "jsonLocation": "designtime/api.json",
         "versions": [
-            "1.46.12",
-            "1.48.11",
-            "1.50.8"
+            // "1.48.19",
+            // "1.50.9",
+            "1.52.7"
         ],
         "namespaces": [
               "sap/m"

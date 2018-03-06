@@ -16,9 +16,8 @@ export default class Generator
     private localConfig: LocalConfig;
 
     public constructor(configPath: string, localConfigPath: string) {
-        var jsonConfig      = fs.readFileSync(configPath, { encoding: "utf-8" });
-        var localJsonConfig = fs.readFileSync(localConfigPath, { encoding: "utf-8" });
-
+        let jsonConfig      = fs.readFileSync(configPath, { encoding: "utf-8" });
+        let localJsonConfig = fs.readFileSync(localConfigPath, { encoding: "utf-8" });
         this.config      = JSON5.parse(jsonConfig);
         this.localConfig = JSON5.parse(localJsonConfig);
     }
@@ -35,7 +34,7 @@ export default class Generator
             
             console.log(`Starting generation of version ${version}...`);
 
-            var requests = this.config.input.namespaces.map(namespace => this.getApiJson(namespace, version));
+            let requests = this.config.input.namespaces.map(namespace => this.getApiJson(namespace, version));
             
             console.log(`All requests made.`);
 
@@ -131,7 +130,7 @@ export default class Generator
         allSymbols.sort((a, b) => a.name.localeCompare(b.name));
 
         let rootNodes = TreeBuilder.createFromSymbolsArray(this.config, allSymbols);
-        for (var node of rootNodes) {
+        for (let node of rootNodes) {
             let output: string[] = [];
             let tsCode = node.generateTypeScriptCode(output);
             this.createFile(`${this.config.output.definitionsPath}${version.replace(/[.]\d+$/, "")}/${node.fullName}.d.ts`, output.join(""));
@@ -147,8 +146,8 @@ export default class Generator
      */
     private printApiData(symbols: ui5.Symbol[]): void
     {
-        var result: { [name: string]: any } = {};
-        var object: { [name: string]: any[] } = {};
+        let result: { [name: string]: any } = {};
+        let object: { [name: string]: any[] } = {};
 
         symbols.forEach(s => (object[s.kind] = object[s.kind] || []).push(s));
 
@@ -199,7 +198,7 @@ export default class Generator
                     if (typeof(value) === "object") {
                         if (treatAsArray.indexOf(key) > -1) {
                             let array: any[] = [];
-                            for (var k in value) {
+                            for (let k in value) {
                                 value[k].$keyEqualsName = k === value[k].name;
                                 array.push(value[k]);
                             }
@@ -239,22 +238,22 @@ export default class Generator
     
         if (symbol.kind == "namespace" && symbol.name.replace(/[.]/g, "/") === symbol.module)
         {
-            var path = this.config.output.exportsPath + symbol.resource.replace(/[.]js$/g, ".d.ts");
-            var content = `export default ${symbol.name};`
+            let path = this.config.output.exportsPath + symbol.resource.replace(/[.]js$/g, ".d.ts");
+            let content = `export default ${symbol.name};`
     
             this.createFile(path, content);
         }
         else if (symbol.kind === "class")
         {
-            var path = this.config.output.exportsPath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
-            var content = `export default ${symbol.name};`
+            let path = this.config.output.exportsPath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
+            let content = `export default ${symbol.name};`
     
             this.createFile(path, content);
         }
         else if (symbol.kind === "enum")
         {
-            var path = this.config.output.exportsPath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
-            var content = `export default ${symbol.name};`
+            let path = this.config.output.exportsPath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
+            let content = `export default ${symbol.name};`
             
             this.createFile(path, content);
         }
@@ -262,7 +261,7 @@ export default class Generator
     
     private createFile(path: string, content: string): void
     {
-        var dirPieces = path.replace(/\/[^/]+$/, "").split("/");
+        let dirPieces = path.replace(/\/[^/]+$/, "").split("/");
     
         // make sure that the directory exists
         for (let i = 0, dir = dirPieces[0]; i < dirPieces.length; i++, dir += `/${dirPieces[i]}`)

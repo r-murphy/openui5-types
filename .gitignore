@@ -4,3 +4,4 @@ node_modules
 *.d.ts
 ui5ts-*.tgz
 /test-resources/
+/build/

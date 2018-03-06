@@ -1,21 +1,23 @@
 {
     "version": "0.4.0",
-    "name": "@rdmurphy/ui5ts",
+    "name": "openui5-types",
     "description": "A simple adapter to develop SAPUI5 and OpenUI5 applications using TypeScript and ES2015 modules/classes",
+    "license": "MIT",
     "keywords": [
         "ui5",
         "openui5",
         "sapui5",
-        "typescript"
+        "typescript",
+        "types"
     ],
-    "homepage": "https://github.com/lmcarreiro/ui5ts",
-    "author": "Leonardo Machado Carreiro <leonardo.mcarreiro@gmail.com>",
+    "homepage": "https://github.com/r-murphy/openui5-types",
+    "author": "Leonardo Machado Carreiro <leonardo.mcarreiro@gmail.com>, Ryan Murphy <rdmurphy@gmail.com>",
     "repository": {
         "type": "git",
-        "url": "https://github.com/lmcarreiro/ui5ts"
+        "url": "https://github.com/r-murphy/openui5-types"
     },
     "bugs": {
-        "url": "https://github.com/lmcarreiro/ui5ts/issues"
+        "url": "https://github.com/r-murphy/openui5-types/issues"
     },
     "devDependencies": {
         "@types/fs-extra": "^5.0.0",
