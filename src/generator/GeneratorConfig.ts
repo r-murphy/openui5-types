@@ -17,6 +17,7 @@ export default interface Config {
     },
     ignore: string[],
     ignoreStatic: string[], // static methods to ignore (if they don't actually exist)
+    
     replacements: {
         global:     { [type: string]: string },
         warnings:    string[],
@@ -26,6 +27,8 @@ export default interface Config {
             methodReturnType:               { [method:      string]: string },
             propertyType:                   { [property:    string]: string },
             methodOverridesNotCompatible:   string[],
+            methodReturnTypeNotThis:        string[],
+            methodRemoveStatic:             string[],
         }
     }
 }

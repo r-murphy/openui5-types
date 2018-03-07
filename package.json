@@ -23,6 +23,7 @@
         "@types/fs-extra": "^5.0.0",
         "@types/jquery": "^2.0.47",
         "@types/json5": "0.0.29",
+        "@types/lodash.includes": "^4.3.3",
         "@types/node": "^8.0.33",
         "@types/request": "^2.0.4",
         "fs-extra": "^5.0.0",
@@ -36,5 +37,9 @@
         "generate": "npm run build:generator && node src/generator/index.js",
         "build:generator": "tsc -p src/generator/tsconfig.json",
         "build:lib": "tsc -p src/lib/tsconfig.json"
+    },
+    "dependencies": {
+        "array-includes": "^3.0.3",
+        "lodash.includes": "^4.3.0"
     }
 }

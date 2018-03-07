@@ -40,6 +40,7 @@
     "ignoreStatic": [
         "sap.m.NotificationListBase.setDatetime",
         "sap.m.NotificationListItem.setDatetime",
+        "sap.m.Text.getText",
     ],
 
     "replacements": {
@@ -95,6 +96,7 @@
         ],
 
         "specific": {
+
             "namespaceAsType": {
                 "sap.ui.commons.SplitterSize":                            "string",
                 "sap.ui.core.BusyIndicator":                              "{class}",
@@ -112,39 +114,56 @@
                 "sap.uxap.BlockBaseColumnLayout":                         "\"auto\"|1|2|3|4",
             },
 
+            "methodRemoveStatic": [
+                "*.clone",
+                "*.bindAggregation",
+                "*.unbindAggregation",
+                "sap.m.IconTabBar.destroyAggregation",
+                "sap.m.Text.getTextDomRef",
+            ],
+
             "methodParameterType": {
-                "sap.ui.base.ManagedObject.propagateMessages.aMessages":                     "string[]",
-                "sap.m.P13nConditionPanel.setKeyFields.aKeyFields":                          "{ key: string, text: string }[]",
-                "sap.ui.model.analytics.AnalyticalBinding.sort.aSorter":                     "sap.ui.model.Sorter|sap.ui.model.Sorter[]",
-                "sap.m.TimePicker.setMinutesStep.iStep":                                     "number",
-                "sap.m.TimePicker.setSecondsStep.iStep":                                     "number",
-                "sap.ui.extensionpoint.fnCreateDefaultContent":                              "() => sap.ui.core.Control[]",
-                "sap.ui.core.delegate.ScrollEnablement.setGrowingList.sScrollLoadDirection": "string",
-                "sap.ui.core.delegate.ScrollEnablement.setIconTabBar.oIconTabBar":           "sap.ui.core.Control",
-                "sap.ui.model.odata.v2.ODataAnnotations.addSource.vSource":                  "string|any[]|any",
+                "sap.ui.base.ManagedObject.propagateMessages.aMessages":                      "string[]",
+                "sap.m.P13nConditionPanel.setKeyFields.aKeyFields":                           "{ key: string, text: string }[]",
+                "sap.ui.model.analytics.AnalyticalBinding.sort.aSorter":                      "sap.ui.model.Sorter|sap.ui.model.Sorter[]",
+                "sap.m.TimePicker.setMinutesStep.iStep":                                      "number",
+                "sap.m.TimePicker.setSecondsStep.iStep":                                      "number",
+                "sap.ui.extensionpoint.fnCreateDefaultContent":                               "() => sap.ui.core.Control[]",
+                "sap.ui.core.delegate.ScrollEnablement.setGrowingList.sScrollLoadDirection":  "string",
+                "sap.ui.core.delegate.ScrollEnablement.setIconTabBar.oIconTabBar":            "sap.ui.core.Control",
+                "sap.ui.model.odata.v2.ODataAnnotations.addSource.vSource":                   "string|any[]|any",
             },
 
             "methodReturnType": {
-                "sap.m.ActionListItem.getMode":                           "string",
-                "sap.m.ComboBox.selectText":                              "sap.m.ComboBox",
-                "sap.m.FacetFilterList.setMode":                          "sap.m.FacetFilterList",
-                "sap.m.Input.setWidth":                                   "sap.m.Input",
-                "sap.m.MenuButton.setTooltip":                            "sap.m.MenuButton",
-                "sap.m.SelectDialog.getDomRef":                           "HTMLElement",
-                "sap.m.TableSelectDialog.getDomRef":                      "HTMLElement",
-                "sap.m.ViewSettingsDialog.getDomRef":                     "HTMLElement",
-                "sap.m.TimePicker.setMinutesStep":                        "sap.m.TimePicker",
-                "sap.m.TimePicker.setSecondsStep":                        "sap.m.TimePicker",
-                "sap.m.OverflowToolbar._getVisibleAndNonOverflowContent": "sap.ui.core.Control[]",
-                "sap.m.P13nConditionPanel.getKeyFields":                  "{ key: string, text: string }[]",
-                "sap.ui.base.Object.getMetadata":                         "sap.ui.base.Metadata",
-                "sap.ui.commons.AutoComplete.getListBox":                 "sap.ui.core.ID",
-                "sap.ui.commons.Carousel.getFocusDomRef":                 "HTMLElement",
-                "sap.ui.core.Element.getDomRef":                          "HTMLElement",
-                "sap.ui.core.Element.getFocusDomRef":                     "HTMLElement",
-                "sap.ui.core.Element._getMediaContainerWidth":            "number|{undefined}",
-                "sap.ui.core.HTML.getDomRef":                             "HTMLElement",
+                "*.filter":                                                                   "this",
+                "*.sort":                                                                     "this",
+                "*.clone":                                                                    "this",
+                "sap.m.ActionListItem.getMode":                                               "string",
+                "sap.m.Input.setWidth":                                                       "sap.m.Input",
+                "sap.m.SelectDialog.getDomRef":                                               "HTMLElement",
+                "sap.m.TableSelectDialog.getDomRef":                                          "HTMLElement",
+                "sap.m.ViewSettingsDialog.getDomRef":                                         "HTMLElement",
+                "sap.m.OverflowToolbar._getVisibleAndNonOverflowContent":                     "sap.ui.core.Control[]",
+                "sap.m.P13nConditionPanel.getKeyFields":                                      "{ key: string, text: string }[]",
+                "sap.ui.base.Object.getMetadata":                                             "sap.ui.base.Metadata",
+                "sap.ui.commons.AutoComplete.getListBox":                                     "sap.ui.core.ID",
+                "sap.ui.commons.Carousel.getFocusDomRef":                                     "HTMLElement",
+                "sap.ui.core.Element.getDomRef":                                              "HTMLElement",
+                "sap.ui.core.Element.getFocusDomRef":                                         "HTMLElement",
+                "sap.ui.core.Element._getMediaContainerWidth":                                "number|{undefined}",
+                "sap.ui.core.HTML.getDomRef":                                                 "HTMLElement",
+                // 'this' overrides where the api had a parent type
+                "sap.ui.commons.layout.ResponsiveFlowLayoutData.setMargin":                   "this",
+                "sap.m.Input.setShowValueStateMessage":                                       "this",
+                "sap.m.Input.setValueStateText":                                              "this",
+                "sap.m.ComboBoxBase.destroyItems":                                            "this",
+                "sap.ui.ux3.ExactAttribute.setProperty":                                      "this",
             },
+
+            // This reverses the logic which determines if the return type can be 'this'.
+            "methodReturnTypeNotThis": [
+                "sap.ui.base.EventProvider.getEventingParent",
+            ],
 
             "propertyType": {
                 

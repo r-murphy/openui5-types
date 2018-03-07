@@ -3,34 +3,44 @@ import Config       from "../GeneratorConfig";
 import TypeUtil     from "../util/TypeUtil";
 import TreeNode     from "./base/TreeNode";
 import Parameter    from "./Parameter";
+const includes = require("lodash.includes");
 
 export default class Method extends TreeNode {
 
     public visibility: ui5.Visibility;
-    private static: boolean;
+    public readonly static: boolean;
     private description: string;
-    public parameters: Parameter[];
-    public returnValue: { type: string, description: string };
+    private parameters: Parameter[];
+    public returnValue: { type: string, description: string }; // TODO make private
 
     private parentKind: ui5.Kind;
+    private parentName: string;
 
     constructor(config: Config, method: ui5.Method, parentName: string, indentationLevel: number, parentKind: ui5.Kind) {
         super(config, indentationLevel, method.name, parentName);
+
+        if (method.static && (includes(config.replacements.specific.methodRemoveStatic, this.fullName) || includes(config.replacements.specific.methodRemoveStatic, `*.${this.name}`))) {
+            method.static = false;
+        }
 
         this.visibility = super.replaceVisibility(method.visibility);
         this.static = method.static || false;
         this.description = method.description || "";
         this.parameters = (method.parameters || []).map(p => new Parameter(this.config, p, this.fullName));
+        this.parentKind = parentKind;
+        this.parentName = parentName;
 
-        let returnTypeReplacement = config.replacements.specific.methodReturnType[this.fullName];
+        let returnTypeReplacement = config.replacements.specific.methodReturnType[this.fullName] || config.replacements.specific.methodReturnType[`*.${this.name}`];
         
         let description = (method.returnValue && method.returnValue.description) || "";
-        let type = returnTypeReplacement || (method.returnValue && method.returnValue.type) || (description ? "any" : "void");
-        type = TypeUtil.replaceTypes(type, config, this.fullName);
+        let returnType = returnTypeReplacement || (method.returnValue && method.returnValue.type) || (description ? "any" : "void");
+        returnType = TypeUtil.replaceTypes(returnType, config, this.fullName);
 
-        this.returnValue = { type, description };
+        if (Method.shouldReplaceReturnTypeWithThis(returnType, this.static, parentKind, parentName, this.fullName, this.name, config)) {
+            returnType = "this";
+        }
 
-        this.parentKind = parentKind;
+        this.returnValue = { type: returnType, description };
     }
 
     public generateTypeScriptCode(output: string[]): void {
@@ -42,7 +52,7 @@ export default class Method extends TreeNode {
     }
 
     private printCompatibilityMethodOverload(output: string[]): void {
-        if (this.config.replacements.specific.methodOverridesNotCompatible.indexOf(this.fullName) > -1) {
+        if (includes(this.config.replacements.specific.methodOverridesNotCompatible, this.fullName)) {
             let symbol: ui5.Parameter = {
                 name: "args",
                 type: "any[]",
@@ -98,14 +108,22 @@ export default class Method extends TreeNode {
         }
 
         let parametersCode = parameters.map(p => p.getTypeScriptCode());
-        returnType = this.name !== "constructor" ? `: ${returnType}` : "";
+        returnType = (this.name === "constructor") ? "" : `: ${returnType}`;
         output.push(`${this.indentation}${declaration}${this.name}(${parametersCode.join(", ")})${returnType};\r\n\r\n`);
+    }
+
+    private static shouldReplaceReturnTypeWithThis(returnType: string, isStatic: boolean, parentKind: ui5.Kind, parentName: string, fullName: string, name: string, config: Config) {
+        return !isStatic &&
+            name !== "constructor" &&
+            parentKind === ui5.Kind.Class &&
+            parentName === returnType &&
+            !includes(config.replacements.specific.methodReturnTypeNotThis, fullName);
     }
 
     private shouldIgnore(): boolean {
         if (this.parentKind === ui5.Kind.Class) {
             if (this.static) {
-                return (this.config.ignoreStatic.indexOf(`${this.fullName}`) !== -1);
+                return includes(this.config.ignoreStatic, this.fullName);
             }
         }
         return false;

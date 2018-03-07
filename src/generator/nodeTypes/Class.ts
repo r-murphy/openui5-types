@@ -114,9 +114,10 @@ export default class Class extends TreeNode {
         }
     }
 
+    // TODO move this to methods by inspecting its parents, and change the method props back to private
     private static fixMethodsOverridesFor(baseClass: Class, subClass: Class, instancesByName: Map<string, Class>, instancesByBaseClass: Map<string, Class[]>): void {
         subClass.methods.forEach(method => {
-            const methodOverridden = Class.findMethodInBaseClassHierarchy(baseClass, method.name, instancesByName);
+            const methodOverridden = Class.findMethodInBaseClassHierarchy(baseClass, method, instancesByName);
             if (methodOverridden) {
                 const returnTypeMethod = method.returnValue.type;
                 const returnTypeMethodOverridden = methodOverridden.returnValue.type;
@@ -135,7 +136,7 @@ export default class Class extends TreeNode {
                     }
                 }
 
-                if (newReturnType && newReturnType !== "any") {
+                if (newReturnType && newReturnType !== "any" && method.returnValue.type !== "this") {
                     //console.log(`${method.fullName}: Replacing return type from '${method.returnValue.type}' to '${newReturnType}' to match the same method in base class '${baseClass.fullName}'.`);
                     method.returnValue.type = newReturnType;
                 }
@@ -149,11 +150,11 @@ export default class Class extends TreeNode {
         Class.fixMethodsOverridesByBaseClass(subClass.fullName, instancesByName, instancesByBaseClass);
     }
 
-    private static findMethodInBaseClassHierarchy(baseClass: Class|undefined, name: string, instancesByName: Map<string, Class>): Method|undefined {
+    private static findMethodInBaseClassHierarchy(baseClass: Class|undefined, method: Method, instancesByName: Map<string, Class>): Method|undefined {
         if (!baseClass) return;
 
         const baseBaseClass = instancesByName.get(baseClass.baseClass);
-        return baseClass.methods.find(m => m.name === name) || Class.findMethodInBaseClassHierarchy(baseBaseClass, name, instancesByName);
+        return baseClass.methods.find(baseMethod => (baseMethod.name === method.name && baseMethod.static === method.static)) || Class.findMethodInBaseClassHierarchy(baseBaseClass, method, instancesByName);
     }
 
     private static checkTypeCompatibility(baseType: string, subType: string, instancesByName: Map<string, Class>): boolean {
