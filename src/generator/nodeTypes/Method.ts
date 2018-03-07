@@ -34,6 +34,9 @@ export default class Method extends TreeNode {
     }
 
     public generateTypeScriptCode(output: string[]): void {
+        if (this.shouldIgnore()) {
+            return;
+        }
         this.printMethodOverloads(output, this.parameters || []);
         this.printCompatibilityMethodOverload(output);
     }
@@ -97,6 +100,15 @@ export default class Method extends TreeNode {
         let parametersCode = parameters.map(p => p.getTypeScriptCode());
         returnType = this.name !== "constructor" ? `: ${returnType}` : "";
         output.push(`${this.indentation}${declaration}${this.name}(${parametersCode.join(", ")})${returnType};\r\n\r\n`);
+    }
+
+    private shouldIgnore(): boolean {
+        if (this.parentKind === ui5.Kind.Class) {
+            if (this.static) {
+                return (this.config.ignoreStatic.indexOf(`${this.fullName}`) !== -1);
+            }
+        }
+        return false;
     }
 
     private printMethodTsDoc(output: string[], description: string, parameters: Parameter[], returnValue: { type: string, description: string }): void {

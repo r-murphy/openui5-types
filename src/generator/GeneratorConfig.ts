@@ -16,6 +16,7 @@ export default interface Config {
         namespaces:     string[],
     },
     ignore: string[],
+    ignoreStatic: string[], // static methods to ignore (if they don't actually exist)
     replacements: {
         global:     { [type: string]: string },
         warnings:    string[],

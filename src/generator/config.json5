@@ -19,23 +19,29 @@
         "namespaces": [
             "sap/ui/core",
             "sap/ui/unified",
-            // "sap/m",
-            // "sap/tnt",
-            // "sap/ui/commons",
-            
-            // "sap/ui/demokit",
-            // "sap/ui/dt",
-            // "sap/ui/layout",
-            // "sap/ui/suite",
-            // "sap/ui/table",
-            
-            // "sap/ui/ux3",
-            // "sap/uxap",
+            "sap/ui/commons",
+            "sap/ui/demokit",
+            "sap/ui/dt",
+            "sap/ui/layout",
+            "sap/ui/suite",
+            "sap/ui/table",
+            "sap/ui/ux3",
+            "sap/m",
+            "sap/f",
+            "sap/tnt",
+            "sap/uxap",
         ]
     },
+
     "ignore": [
         "jQuery.Event"
     ],
+
+    "ignoreStatic": [
+        "sap.m.NotificationListBase.setDatetime",
+        "sap.m.NotificationListItem.setDatetime",
+    ],
+
     "replacements": {
         "global": {
             "function":                                           "Function",
@@ -75,8 +81,19 @@
             "sap.ui.core.support.Support":                        "any",
             "sap.ui.test.qunit":                                  "any",
             "[object Object]":                                    "any",
+            "Array.<[object Object]>":                            "sap.ui.core.Control[]",
+            "sap.m.LightBox":                                     "any",
         },
-        "warnings": ["Function", "any", "any[]", "Promise<any>", "JQueryPromise<any>", "IterableIterator<any>"],
+
+        "warnings": [
+            "Function",
+            "any",
+            "any[]",
+            "Promise<any>",
+            "JQueryPromise<any>",
+            "IterableIterator<any>"
+        ],
+
         "specific": {
             "namespaceAsType": {
                 "sap.ui.commons.SplitterSize":                            "string",
