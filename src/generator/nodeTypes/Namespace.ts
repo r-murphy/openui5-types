@@ -19,27 +19,46 @@ export default class Namespace extends TreeNode {
         super(config, indentationLevel, apiSymbol);
 
         this.apiSymbol = apiSymbol;
-
+        
         this.description = apiSymbol.description || "";
         this.properties = (apiSymbol.properties || []).map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, this.isJQueryNamespace ? ui5.Kind.Interface : ui5.Kind.Namespace));
         this.methods    = (apiSymbol.methods    || []).map(m => new Method  (this.config, m, this.fullName, indentationLevel + 1, this.isJQueryNamespace ? ui5.Kind.Interface : ui5.Kind.Namespace));
-        this.children = children;
+        this.setChildren(children);
     }
 
     public generateTypeScriptCode(output: string[]): void {
         var type = this.config.replacements.specific.namespaceAsType[this.fullName];
 
-        if (!type) {
-            if (this.isJQueryNamespace) {
-                this.generateTypeScriptCodeJQuery(output);
-            }
-            else {
-                this.generateTypeScriptCodeSap(output);
-            }
-        }
-        else {
+        if (type) {
             this.generateNamespaceAsType(output, type);
         }
+        else if (this.isJQueryNamespace) {
+            this.generateTypeScriptCodeJQuery(output);
+        }
+        else {
+            this.generateTypeScriptCodeSap(output);
+        }
+    }
+
+    private setChildren(children: TreeNode[]) {
+        this.children = children;
+        // this.children = children.sort((a, b) => {
+        //     if (a instanceof Namespace && a instanceof Namespace) {
+        //         return a.fullName.localeCompare(b.fullName); // or could be 0. not actually important.
+        //     }
+        //     else if (a instanceof Namespace) {
+        //         return -1; // or could be 0. not actually important.
+        //     }
+        //     else if (b instanceof Namespace) {
+        //         return 1; // or could be 0. not actually important.
+        //     }
+        //     else if (a instanceof Class && b instanceof Class) {
+        //         return a.compare(b); // This is the important one.
+        //     }
+        //     else {
+        //         return 0;
+        //     }
+        // });
     }
 
     private generateNamespaceAsType(output: string[], type: string) {

@@ -1,123 +1,50 @@
-import * as request             from 'request';
-import * as fs                  from 'fs';
-import * as fse                 from 'fs-extra';
-import * as Path                from 'path';
-import * as JSON5               from 'json5';
-import * as ui5                 from './ui5api';
-import TreeNode                 from './nodeTypes/base/TreeNode';
-import TreeBuilder              from './nodeTypes/base/TreeBuilder';
-import Config, { LocalConfig }  from './GeneratorConfig';
 
-const versionMarker = "{{VERSION}}";
+import * as fs        from 'fs';
+import * as Path      from 'path';
+import * as JSON5     from 'json5';
+import * as ui5       from './ui5api';
+import TreeNode       from './nodeTypes/base/TreeNode';
+import TreeBuilder    from './nodeTypes/base/TreeBuilder';
+import Config         from './GeneratorConfig';
+import { getApiJson } from './util/ApiFetcher';
 
 export default class Generator
 {
     private config: Config;
-    private localConfig: LocalConfig;
 
-    public constructor(configPath: string, localConfigPath: string) {
+    public constructor(configPath: string) {
         let jsonConfig      = fs.readFileSync(configPath, { encoding: "utf-8" });
-        let localJsonConfig = fs.readFileSync(localConfigPath, { encoding: "utf-8" });
-        this.config      = JSON5.parse(jsonConfig);
-        this.localConfig = JSON5.parse(localJsonConfig);
+        this.config         = JSON5.parse(jsonConfig);
     }
 
-    public generate(): void
+    public async generate(): Promise<void>
     {
         let versions = this.config.input.versions;
-        this.generateVersions(versions);
-    }
-
-    private generateVersions(versions: string[]): void {
-        if (versions.length) {
-            let version = versions[0];
-            
-            console.log(`Starting generation of version ${version}...`);
-
-            let requests = this.config.input.namespaces.map(namespace => this.getApiJson(namespace, version));
-            
-            console.log(`All requests made.`);
-
-            Promise.all(requests)
-                .then(apiList => {
-                    this.execute(apiList, version);
-                    console.log(`Generation of version ${version} complete.`);
-
-                    this.generateVersions(versions.slice(1))
-                })
-                .catch(error => {
-                    console.log("\x1b[31m", `\n\n  Error generating ${version}: ${error}\n\n`);
-                    if (error.stack) {
-                        console.error(error.stack);
-                    }
-                    process.exit(1);
-                });
+        for (let version of versions) {
+            await this.generateVersion(version);
         }
     }
-    
-    private async getApiJson(namespace: string, version: string): Promise<ui5.API>
+
+    private async generateVersion(version: string): Promise<void>
     {
-        if (this.localConfig.runLocal) {
-            let path = `${this.localConfig.path}/${namespace}/${this.config.input.jsonLocation}`
-                .replace(/\//g, Path.sep)
-                .replace(versionMarker, version);
-
-            if (!(fs.existsSync(path))) {
-
-                console.log(`Making local file '${path}'`);
-
-                let api = await this.getServerApiJson(namespace, version);
-
-                fse.ensureFileSync(path);
-
-                fse.writeJson(path, api, {
-                    spaces: this.config.output.indentation
-                });
-                
-                return api;
+        console.log(`Starting generation of version ${version}...`);
+        try {
+            let requestsPromises = this.config.input.namespaces.map(namespace => getApiJson(this.config, namespace, version));
+            console.log(`All requests made.`);
+            const apiList = await Promise.all(requestsPromises);
+            this.generateFromDesignTimeApi(apiList, version);
+            console.log(`Generation of version ${version} complete.`);
+        }
+        catch (error) {
+            console.log("\x1b[31m", `\n\n  Error generating ${version}: ${error}\n\n`);
+            if (error.stack) {
+                console.error(error.stack);
             }
-            
-            console.log(`Reading local file '${path}'`);
-
-            return new Promise((resolve: (api: ui5.API) => void, reject: (error: any) => void) => {
-                fs.readFile(path, { encoding: "utf-8" }, (err, data) => {
-                    if (!err) {
-                        console.log(`Got content from '${path}'`);
-                        resolve(JSON5.parse(data))
-                    }
-                    else {
-                        console.log(`Got error from '${path}'`);
-                        reject(`${err}`);
-                    }
-                });
-            });
+            process.exit(1);
         }
-        else {
-            return this.getServerApiJson(namespace, version);
-        }
-    }
-
-    private async getServerApiJson(namespace: string, version: string): Promise<ui5.API> {
-        let url = `${this.config.input.apiBaseUrl}/${namespace}/${this.config.input.jsonLocation}`
-            .replace(versionMarker, version);
-        
-        console.log(`Making request to '${url}'`);
-
-        return new Promise((resolve: (api: ui5.API) => void, reject: (error: any) => void) => {
-            request({ url: url, json: true }, (error, response, body) => {
-                if (!error && response && response.statusCode === 200) {
-                    console.log(`Got response from '${url}'`);
-                    resolve(response.body);
-                }
-                else {
-                    console.log(`Got error from '${url}'`);
-                    reject(`${response.statusCode} - ${response.statusMessage}`);
-                }
-            });
-        });
     }
     
-    private execute(apiList: ui5.API[], version: string): void
+    private generateFromDesignTimeApi(apiList: ui5.API[], version: string): void
     {
         this.createExports(apiList);
         this.createDefinitions(apiList, version);
@@ -127,7 +54,9 @@ export default class Generator
     {
         let allSymbols = apiList.map(api => api.symbols).reduce((a, b) => a.concat(b));
 
-        allSymbols.sort((a, b) => a.name.localeCompare(b.name));
+        // allSymbols.forEach(s => {
+        //     console.log(s.name, "~~", s.kind);
+        // })
 
         let rootNodes = TreeBuilder.createFromSymbolsArray(this.config, allSymbols);
         for (let node of rootNodes) {
@@ -144,85 +73,86 @@ export default class Generator
      * This method just print api data to help identify and understand de API structure and define it in ui5api.ts
      * @param symbols Symbols array
      */
-    private printApiData(symbols: ui5.Symbol[]): void
-    {
-        let result: { [name: string]: any } = {};
-        let object: { [name: string]: any[] } = {};
+    // private printApiData(symbols: ui5.Symbol[]): void
+    // {
+    //     let result: { [name: string]: any } = {};
+    //     let object: { [name: string]: any[] } = {};
 
-        symbols.forEach(s => (object[s.kind] = object[s.kind] || []).push(s));
+    //     symbols.forEach(s => (object[s.kind] = object[s.kind] || []).push(s));
 
-        this.addToResult(result, object);
+    //     this.addToResult(result, object);
 
-        console.log(result);
-    }
+    //     fs.writeFileSync("build/results.json", JSON.stringify(result, undefined, 2));
+    //     // console.log(result);
+    // }
 
-    private addToResult(result: { [name: string]: any }, object: any): void
-    {
-        let storageValuesFrom = [
-            "kind",
-            "visibility",
-            "static",
-            "final",
-            "abstract",
-            "optional",
-            "defaultValue",
-            "$keyEqualsName"
-        ];
+    // private addToResult(result: { [name: string]: any }, object: any): void
+    // {
+    //     let storageValuesFrom = [
+    //         "kind",
+    //         "visibility",
+    //         "static",
+    //         "final",
+    //         "abstract",
+    //         "optional",
+    //         "defaultValue",
+    //         "$keyEqualsName"
+    //     ];
 
-        let treatAsArray = [
-            "parameterProperties"
-        ];
+    //     let treatAsArray = [
+    //         "parameterProperties"
+    //     ];
 
-        if (Array.isArray(object)) {
-            if (object.length > 0 && typeof(object[0]) === "object") {
-                result.$length = (result.$length || 0) + object.length;
-                object.forEach(o => this.addToResult(result, o));
-            }
-            else {
-                result.$examples = result.$examples || [];
-                if (result.$examples.length < 5) result.$examples.push(object);
-            }
-        }
-        else {
-            if (object && object.hasOwnProperty("defaultValue")) {
-                object.defaultValue = typeof(object.defaultValue) + "[" + object.defaultValue + "]";
-            }
-            for (let key in object) {
-                if (object.hasOwnProperty(key)) {
-                    let value = object[key];
-                    key = key === "constructor" ? "_constructor" : key;
+    //     if (Array.isArray(object)) {
+    //         if (object.length > 0 && typeof(object[0]) === "object") {
+    //             result.$length = (result.$length || 0) + object.length;
+    //             object.forEach(o => this.addToResult(result, o));
+    //         }
+    //         else {
+    //             result.$examples = result.$examples || [];
+    //             if (result.$examples.length < 5) result.$examples.push(object);
+    //         }
+    //     }
+    //     else {
+    //         if (object && object.hasOwnProperty("defaultValue")) {
+    //             object.defaultValue = typeof(object.defaultValue) + "[" + object.defaultValue + "]";
+    //         }
+    //         for (let key in object) {
+    //             if (object.hasOwnProperty(key)) {
+    //                 let value = object[key];
+    //                 key = key === "constructor" ? "_constructor" : key;
 
-                    result[key] = result[key] || { $count: 0 };
-                    result[key].$count++;
+    //                 result[key] = result[key] || { $count: 0 };
+    //                 result[key].$count++;
 
-                    if (typeof(value) === "object") {
-                        if (treatAsArray.indexOf(key) > -1) {
-                            let array: any[] = [];
-                            for (let k in value) {
-                                value[k].$keyEqualsName = k === value[k].name;
-                                array.push(value[k]);
-                            }
-                            value = array;
-                        }
-                        this.addToResult(result[key], value);
-                    }
-                    else {
+    //                 if (typeof(value) === "object") {
+    //                     if (treatAsArray.indexOf(key) > -1) {
+    //                         let array: any[] = [];
+    //                         for (let k in value) {
+    //                             value[k].$keyEqualsName = k === value[k].name;
+    //                             array.push(value[k]);
+    //                         }
+    //                         value = array;
+    //                     }
+    //                     this.addToResult(result[key], value);
+    //                 }
+    //                 else {
 
-                        if (storageValuesFrom.indexOf(key) > -1) {
-                            result[key][value] = result[key][value] || 0;
-                            result[key][value]++;
-                        }
-                        else {
-                            result[key].$examples = result[key].$examples || [];
-                            if (result[key].$examples.length < 5 && result[key].$examples.indexOf(value) === -1) {
-                                result[key].$examples.push(value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //                     if (storageValuesFrom.indexOf(key) > -1) {
+    //                         result[key][value] = result[key][value] || 0;
+    //                         result[key][value]++;
+    //                     }
+    //                     else {
+    //                         result[key].$examples = result[key].$examples || [];
+    //                         if (result[key].$examples.length < 5 && result[key].$examples.indexOf(value) === -1) {
+    //                             result[key].$examples.push(value);
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     private createExports(apiList: ui5.API[]): void
     {

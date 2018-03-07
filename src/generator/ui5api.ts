@@ -1,3 +1,4 @@
+
 export interface API {
     library: string;
     symbols: Symbol[];

@@ -1,4 +1,9 @@
+
 export default interface Config {
+    local: {
+        runLocal: boolean,
+        path:     string,
+    }
     output: {
         exportsPath:        string,
         definitionsPath:    string,
@@ -22,9 +27,4 @@ export default interface Config {
             methodOverridesNotCompatible:   string[],
         }
     }
-}
-
-export interface LocalConfig {
-    runLocal: boolean,
-    path:     string,
 }

@@ -11,22 +11,34 @@ export default class TreeBuilder {
 
     public static createFromSymbolsArray(config: Config, symbols: ui5.Symbol[]): TreeNode[]
     {
+        symbols.sort((a, b) => a.name.localeCompare(b.name));
         let rootNodes = TreeBuilder.createNodeChildren(config, symbols, 0);
+        // let rootNodes = TreeBuilder.createTree2(config, symbols, 0);
         Class.fixMethodsOverrides(rootNodes);
-
         return rootNodes;
     }
 
-    private static createNode(config: Config, symbol: ui5.Symbol, children: TreeNode[], indentationLevel: number): TreeNode {
-        switch (symbol.kind) {
-            case ui5.Kind.Namespace: return new Namespace   (config, symbol, children, indentationLevel);
-            case ui5.Kind.Class:     return new Class       (config, symbol, children, indentationLevel);
-            case ui5.Kind.Interface: return new Interface   (config, symbol, children, indentationLevel);
-            case ui5.Kind.Enum:      return new Enum        (config, symbol, children, indentationLevel);
-            case ui5.Kind.Typedef:   return new Typedef     (config, symbol, children, indentationLevel);
-            default: throw new Error(`Unknown symbol kind: ${(<any>symbol).kind}`);
-        }
-    }
+    // private static createTree2(config: Config, symbols: ui5.Symbol[]): TreeNode[] {
+    //     let childrenMap: {[parentName: string]: Array<ui5.Symbol> } = {};
+    //     for (let symbol of symbols) {
+    //         // let { name } = symbol;
+    //         childrenMap[symbol.name] = [];
+    //         let parentName = symbol.name.split(".").slice(0, -1).join(".");
+    //         // console.log(name, "<", parentName)
+    //         let children = childrenMap[parentName];
+    //         if (children) {
+    //             children.push(symbol);
+    //         }
+    //     }
+    //     console.log("---------------------------------------------------------------------------------------------------------")
+    //     let rootNodes: TreeNode[] = [];
+    //     for (let symbol of symbols) {
+    //         let { name } = symbol;
+    //         let children = childrenMap[name] || [];
+    //         console.log(symbol.name, "~~", children.map(c => c.name).join(","))
+    //     }
+    //     return rootNodes;
+    // }
 
     private static createNodeChildren(config: Config, symbols: ui5.Symbol[], indentationLevel: number): TreeNode[]
     {
@@ -39,7 +51,7 @@ export default class TreeBuilder {
 
         for (var namespace of namespaces) {
             if (config.ignore.indexOf(namespace) === -1) {
-                var parentSymbol = symbols.find(s => s.name === namespace) || <ui5.SymbolNamespace>{
+                let parentSymbol = symbols.find(s => s.name === namespace) || <ui5.SymbolNamespace>{
                     kind: ui5.Kind.Namespace
                     , visibility: ui5.Visibility.Public
                     , name: namespace
@@ -47,15 +59,24 @@ export default class TreeBuilder {
                     , module: ""
                     , resource: ""
                 };
-                var childrenSymbols = symbols.filter(s => s.name.startsWith(namespace + "."));
-
-                var children = TreeBuilder.createNodeChildren(config, childrenSymbols, indentationLevel + 1);
-                var newNode = TreeBuilder.createNode(config, parentSymbol, children, indentationLevel);
-
+                let childrenSymbols = symbols.filter(s => s.name.startsWith(namespace + "."));
+                let children = TreeBuilder.createNodeChildren(config, childrenSymbols, indentationLevel + 1);
+                let newNode = TreeBuilder.createNode(config, parentSymbol, children, indentationLevel);
                 nodes.push(newNode);
             }
         }
 
         return nodes;
+    }
+
+    private static createNode(config: Config, symbol: ui5.Symbol, children: TreeNode[], indentationLevel: number): TreeNode {
+        switch (symbol.kind) {
+            case ui5.Kind.Namespace: return new Namespace   (config, symbol, children, indentationLevel);
+            case ui5.Kind.Class:     return new Class       (config, symbol, children, indentationLevel);
+            case ui5.Kind.Interface: return new Interface   (config, symbol, children, indentationLevel);
+            case ui5.Kind.Enum:      return new Enum        (config, symbol, children, indentationLevel);
+            case ui5.Kind.Typedef:   return new Typedef     (config, symbol, children, indentationLevel);
+            default: throw new Error(`Unknown symbol kind: ${(<any>symbol).kind}`);
+        }
     }
 }

@@ -3,6 +3,7 @@
         "target": "es2015",
         "module": "none",
         "moduleResolution": "node",
+        "noUnusedLocals": true,
         "experimentalDecorators": true,
         "alwaysStrict": true,
         "noImplicitAny": true,

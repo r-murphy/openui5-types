@@ -116,22 +116,22 @@ export default class Class extends TreeNode {
 
     private static fixMethodsOverridesFor(baseClass: Class, subClass: Class, instancesByName: Map<string, Class>, instancesByBaseClass: Map<string, Class[]>): void {
         subClass.methods.forEach(method => {
-            const methodOverrided = Class.findMethodInBaseClassHierarchy(baseClass, method.name, instancesByName);
-            if (methodOverrided) {
+            const methodOverridden = Class.findMethodInBaseClassHierarchy(baseClass, method.name, instancesByName);
+            if (methodOverridden) {
                 const returnTypeMethod = method.returnValue.type;
-                const returnTypeMethodOverrided = methodOverrided.returnValue.type;
+                const returnTypeMethodOverridden = methodOverridden.returnValue.type;
 
                 let newReturnType: string|undefined;
-                if (!Class.checkTypeCompatibility(returnTypeMethodOverrided, returnTypeMethod, instancesByName)) {
+                if (!Class.checkTypeCompatibility(returnTypeMethodOverridden, returnTypeMethod, instancesByName)) {
                     // for "return this" methods
-                    if (returnTypeMethodOverrided === baseClass.fullName) {
+                    if (returnTypeMethodOverridden === baseClass.fullName) {
                         if (returnTypeMethod !== subClass.fullName) {
                             newReturnType = subClass.fullName; // "return this" in this case it's the subClass
                         }
                     }
                     // for "return somethingElse" methods
                     else {
-                        newReturnType = methodOverrided.returnValue.type;
+                        newReturnType = methodOverridden.returnValue.type;
                     }
                 }
 
@@ -140,7 +140,7 @@ export default class Class extends TreeNode {
                     method.returnValue.type = newReturnType;
                 }
 
-                if (methodOverrided.visibility === ui5.Visibility.Public && method.visibility === ui5.Visibility.Protected) {
+                if (methodOverridden.visibility === ui5.Visibility.Public && method.visibility === ui5.Visibility.Protected) {
                     method.visibility = ui5.Visibility.Public;
                 }
             }
@@ -175,4 +175,17 @@ export default class Class extends TreeNode {
 
         return false;
     }
+
+    public compare(other: Class) {
+        if (this.fullName === other.baseClass) {
+            return -1; // this first
+        }
+        else if (this.baseClass === other.fullName) {
+            return 1; // other first
+        }
+        else {
+            return this.fullName.localeCompare(other.fullName);
+        }
+    }
+
 }
