@@ -24,11 +24,13 @@ export default interface Config {
         warnings:    string[],
         specific:   {
             namespaceAsType:                { [namespace:   string]: string  },
+            propertyType:                   { [property:    string]: string  },
+            filterMethods:                  { [method:      string]: boolean },
+            // methods
             methodParameterType:            { [parameter:   string]: string  },
             methodReturnType:               { [method:      string]: string  },
-            propertyType:                   { [property:    string]: string  },
             methodParameterOptional:        { [method:      string]: boolean },
-            filterMethods:                  { [method:      string]: boolean },
+            methodVisibilityPublic:         { [method:      string]: boolean },
             methodOverridesNotCompatible:   string[],
             methodReturnTypeNotThis:        string[],
             methodRemoveStatic:             string[],

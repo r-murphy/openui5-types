@@ -21,18 +21,24 @@ export default class Method extends TreeNode {
     constructor(config: Config, method: ui5.Method, parentName: string, indentationLevel: number, parentKind: ui5.Kind) {
         super(config, indentationLevel, method.name, parentName);
 
-        if (method.static && (includes(config.replacements.specific.methodRemoveStatic, this.fullName) || includes(config.replacements.specific.methodRemoveStatic, `*.${this.name}`))) {
+        if (method.static && this.getConfig(config.replacements.specific.methodRemoveStatic)) {
             method.static = false;
         }
 
-        this.visibility = super.replaceVisibility(method.visibility);
+        if (this.getConfig(config.replacements.specific.methodVisibilityPublic)) {
+            this.visibility = ui5.Visibility.Public;
+        }
+        else {
+            this.visibility = super.replaceVisibility(method.visibility);
+        }
+        
         this.static = method.static || false;
         this.description = method.description || "";
         this.parameters = (method.parameters || []).map(p => new Parameter(this.config, p, this.fullName));
         this.parentKind = parentKind;
         this.parentName = parentName;
 
-        let returnTypeReplacement = config.replacements.specific.methodReturnType[this.fullName] || config.replacements.specific.methodReturnType[`*.${this.name}`];
+        let returnTypeReplacement = this.getConfig(config.replacements.specific.methodReturnType);
         
         let description = (method.returnValue && method.returnValue.description) || "";
         let returnType = returnTypeReplacement || (method.returnValue && method.returnValue.type) || (description ? "any" : "void");
@@ -43,6 +49,15 @@ export default class Method extends TreeNode {
         }
 
         this.returnValue = { type: returnType, description };
+    }
+
+    private getConfig(mapOrArr: any) {
+        if (Array.isArray(mapOrArr)) {
+            return includes(mapOrArr, this.fullName) || includes(mapOrArr, `*.${this.name}`)
+        }
+        else {
+            return mapOrArr[this.fullName] || mapOrArr[`*.${this.name}`]
+        }
     }
 
     public generateTypeScriptCode(output: string[]): void {

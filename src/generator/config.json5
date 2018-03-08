@@ -101,6 +101,10 @@
         "specific": {
 
             "filterMethods": {
+                "sap.m.BusyDialog.getDomRef":                             true,
+                "sap.m.SelectDialog.addStyleClass":                       true,
+                "sap.m.TableSelectDialog.addStyleClass":                  true,
+                "sap.m.ViewSettingsDialog.addStyleClass":                 true,
                 "sap.ui.core.Element.clone":                              true,
             },
 
@@ -131,26 +135,33 @@
                 "sap.m.BusyDialog.close",
             ],
 
+            methodVisibilityPublic: {
+                "*.$"                                                     : true,
+                "*.getDomRef"                                             : true, 
+            },
+
             "methodParameterOptional": {
                 // module.method.parameter
-                "jQuery.sap.getModulePath.sSuffix": true,
-                "jQuery.sap.syncGetJSON.data": true,
-                "jQuery.sap.syncGetText.data": true,
-                "sap.m.BusyDialog.close.isClosedFromUserInteraction": true,
-                "sap.m.Dialog.insertButton.iIndex": true,
-                "sap.ui.model.json.JSONModel.constructor.oData": true,
-                "sap.ui.model.json.JSONModel.constructor.bObserve": true,
+                "jQuery.sap.getModulePath.sSuffix":                       true,
+                "jQuery.sap.syncGetJSON.data":                            true,
+                "jQuery.sap.syncGetText.data":                            true,
+                "sap.m.BusyDialog.close.isClosedFromUserInteraction":     true,
+                "sap.m.Dialog.insertButton.iIndex":                       true,
+                "sap.ui.model.Context.getPath.sPath":                     true,
+                "sap.ui.model.Context.getProperty.sPath":                 true,
+                "sap.ui.model.json.JSONModel.constructor.oData":          true,
+                "sap.ui.model.json.JSONModel.constructor.bObserve":       true,
                 // *.method.parameter
-                "*.fireEvent.mParameters": true,
-                "*.openBy.oControl": true,
-                "*.openBy.bWithKeyboard": true,
+                "*.fireEvent.mParameters":                                true,
+                "*.openBy.oControl":                                      true,
+                "*.openBy.bWithKeyboard":                                 true,
                 // *.parameter
-                "*.bForceUpdate": true,
-                "*.bSkipInstanceManager": true,
-                "*.oBackData": true,
-                "*.oListener": true,
-                "*.oTransitionParameter": true,
-                "*.oTransitionParameters": true,
+                "*.bForceUpdate":                                         true,
+                "*.bSkipInstanceManager":                                 true,
+                "*.oBackData":                                            true,
+                "*.oListener":                                            true,
+                "*.oTransitionParameter":                                 true,
+                "*.oTransitionParameters":                                true,
             },
 
             "methodParameterType": {
@@ -183,21 +194,16 @@
                 "*.sort":                                                                     "this",
                 "*.clone":                                                                    "this",
                 "*.open":                                                                     "this",
+                "*.getDomRef":                                                                "HTMLElement",
+                "*.getFocusDomRef":                                                           "HTMLElement",
                 // module.method
                 "sap.m.ActionListItem.getMode":                                               "string",
-                "sap.m.Input.setWidth":                                                       "sap.m.Input",
-                "sap.m.SelectDialog.getDomRef":                                               "HTMLElement",
-                "sap.m.TableSelectDialog.getDomRef":                                          "HTMLElement",
-                "sap.m.ViewSettingsDialog.getDomRef":                                         "HTMLElement",
+                "sap.m.Input.setWidth":                                                       "this",
                 "sap.m.OverflowToolbar._getVisibleAndNonOverflowContent":                     "sap.ui.core.Control[]",
                 "sap.m.P13nConditionPanel.getKeyFields":                                      "{ key: string, text: string }[]",
                 "sap.ui.base.Object.getMetadata":                                             "sap.ui.base.Metadata",
                 "sap.ui.commons.AutoComplete.getListBox":                                     "sap.ui.core.ID",
-                "sap.ui.commons.Carousel.getFocusDomRef":                                     "HTMLElement",
-                "sap.ui.core.Element.getDomRef":                                              "HTMLElement",
-                "sap.ui.core.Element.getFocusDomRef":                                         "HTMLElement",
                 "sap.ui.core.Element._getMediaContainerWidth":                                "number|{undefined}",
-                "sap.ui.core.HTML.getDomRef":                                                 "HTMLElement",
                 "sap.ui.base.ManagedObject.findAggregatedObjects":                            "sap.ui.base.ManagedObject[]",
                 // 'this' overrides where the api had a parent type
                 "sap.ui.commons.layout.ResponsiveFlowLayoutData.setMargin":                   "this",
