@@ -21,15 +21,16 @@
     },
     "devDependencies": {
         "@types/fs-extra": "^5.0.0",
-        "@types/jquery": "^2.0.47",
         "@types/json5": "0.0.29",
         "@types/lodash.includes": "^4.3.3",
-        "@types/node": "^8.0.33",
+        "@types/node": "^9.4.6",
         "@types/request": "^2.0.4",
+        "array-includes": "^3.0.3",
         "fs-extra": "^5.0.0",
         "json5": "^0.5.1",
+        "lodash.includes": "^4.3.0",
         "request": "^2.83.0",
-        "typescript": "^2.7.0-dev.20171031"
+        "typescript": "^2.7.2"
     },
     "scripts": {
         "prepack": "npm run generate && npm run build:lib",
@@ -41,9 +42,5 @@
         "build:lib:watch": "tsc -p src/lib/tsconfig.json -w",
         "run:gen": "node src/generator/index.js",
         "run:gen:inspect": "node --inspect src/generator/index.js"
-    },
-    "dependencies": {
-        "array-includes": "^3.0.3",
-        "lodash.includes": "^4.3.0"
     }
 }
