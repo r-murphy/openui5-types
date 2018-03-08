@@ -9,7 +9,7 @@ import Config from '../GeneratorConfig';
 
 const versionMarker = "{{VERSION}}";
 
-export async function getApiJson(config: Config, namespace: string, version: string): Promise<ui5.API>
+export async function getApiJson(config: Config, namespace: string, version: string): Promise<ui5.API> 
 {
     if (config.local.runLocal) {
         let path = `${config.local.path}/${namespace}/${config.input.jsonLocation}`
@@ -17,41 +17,23 @@ export async function getApiJson(config: Config, namespace: string, version: str
             .replace(versionMarker, version);
 
         if (!(fs.existsSync(path))) {
-
             console.log(`Making local file '${path}'`);
-
             let api = await getServerApiJson(config, namespace, version);
-
             fse.ensureFileSync(path);
-
             fse.writeJson(path, api, {
                 spaces: config.output.indentation
             });
-            
             return api;
         }
-        
-        console.log(`Reading local file '${path}'`);
-
-        return new Promise((resolve: (api: ui5.API) => void, reject: (error: any) => void) => {
-            fs.readFile(path, { encoding: "utf-8" }, (err, data) => {
-                if (!err) {
-                    console.log(`Got content from '${path}'`);
-                    resolve(JSON5.parse(data))
-                }
-                else {
-                    console.log(`Got error from '${path}'`);
-                    reject(`${err}`);
-                }
-            });
-        });
+        return getFileApiJson(config, path);
     }
     else {
         return getServerApiJson(config, namespace, version);
     }
 }
 
-export async function getServerApiJson(config: Config, namespace: string, version: string): Promise<ui5.API> {
+async function getServerApiJson(config: Config, namespace: string, version: string): Promise<ui5.API>
+{
     let url = `${config.input.apiBaseUrl}/${namespace}/${config.input.jsonLocation}`
         .replace(versionMarker, version);
     
@@ -66,6 +48,23 @@ export async function getServerApiJson(config: Config, namespace: string, versio
             else {
                 console.log(`Got error from '${url}'`);
                 reject(`${response.statusCode} - ${response.statusMessage}`);
+            }
+        });
+    });
+}
+
+async function getFileApiJson(config: Config, path: string): Promise<ui5.API>
+{
+    console.log(`Reading local file '${path}'`);
+    return new Promise((resolve: (api: ui5.API) => void, reject: (error: any) => void) => {
+        fs.readFile(path, { encoding: "utf-8" }, (err, data) => {
+            if (!err) {
+                console.log(`Got content from '${path}'`);
+                resolve(JSON5.parse(data))
+            }
+            else {
+                console.log(`Got error from '${path}'`);
+                reject(`${err}`);
             }
         });
     });

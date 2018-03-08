@@ -2,7 +2,7 @@
 import * as fs        from 'fs';
 import * as Path      from 'path';
 import * as JSON5     from 'json5';
-import * as ui5       from './ui5api';
+import * as UI5API    from './ui5api';
 import TreeNode       from './nodeTypes/base/TreeNode';
 import TreeBuilder    from './nodeTypes/base/TreeBuilder';
 import Config         from './GeneratorConfig';
@@ -44,19 +44,26 @@ export default class Generator
         }
     }
     
-    private generateFromDesignTimeApi(apiList: ui5.API[], version: string): void
+    private generateFromDesignTimeApi(apiList: UI5API.API[], version: string): void
     {
+        this.applyAdditions(apiList);
         this.createExports(apiList);
         this.createDefinitions(apiList, version);
     }
 
-    private createDefinitions(apiList: ui5.API[], version: string): void
+    private applyAdditions(apiList: UI5API.API[])
+    {
+        for (let api of apiList) {
+            let additions = this.config.additions[api.library];
+            if (additions) {
+                api.symbols.push(...additions);
+            }
+        }
+    }
+
+    private createDefinitions(apiList: UI5API.API[], version: string): void
     {
         let allSymbols = apiList.map(api => api.symbols).reduce((a, b) => a.concat(b));
-
-        // allSymbols.forEach(s => {
-        //     console.log(s.name, "~~", s.kind);
-        // })
 
         let rootNodes = TreeBuilder.createFromSymbolsArray(this.config, allSymbols);
         for (let node of rootNodes) {
@@ -69,97 +76,12 @@ export default class Generator
         // this.printApiData(allSymbols);
     }
 
-    /**
-     * This method just print api data to help identify and understand de API structure and define it in ui5api.ts
-     * @param symbols Symbols array
-     */
-    // private printApiData(symbols: ui5.Symbol[]): void
-    // {
-    //     let result: { [name: string]: any } = {};
-    //     let object: { [name: string]: any[] } = {};
-
-    //     symbols.forEach(s => (object[s.kind] = object[s.kind] || []).push(s));
-
-    //     this.addToResult(result, object);
-
-    //     fs.writeFileSync("build/results.json", JSON.stringify(result, undefined, 2));
-    //     // console.log(result);
-    // }
-
-    // private addToResult(result: { [name: string]: any }, object: any): void
-    // {
-    //     let storageValuesFrom = [
-    //         "kind",
-    //         "visibility",
-    //         "static",
-    //         "final",
-    //         "abstract",
-    //         "optional",
-    //         "defaultValue",
-    //         "$keyEqualsName"
-    //     ];
-
-    //     let treatAsArray = [
-    //         "parameterProperties"
-    //     ];
-
-    //     if (Array.isArray(object)) {
-    //         if (object.length > 0 && typeof(object[0]) === "object") {
-    //             result.$length = (result.$length || 0) + object.length;
-    //             object.forEach(o => this.addToResult(result, o));
-    //         }
-    //         else {
-    //             result.$examples = result.$examples || [];
-    //             if (result.$examples.length < 5) result.$examples.push(object);
-    //         }
-    //     }
-    //     else {
-    //         if (object && object.hasOwnProperty("defaultValue")) {
-    //             object.defaultValue = typeof(object.defaultValue) + "[" + object.defaultValue + "]";
-    //         }
-    //         for (let key in object) {
-    //             if (object.hasOwnProperty(key)) {
-    //                 let value = object[key];
-    //                 key = key === "constructor" ? "_constructor" : key;
-
-    //                 result[key] = result[key] || { $count: 0 };
-    //                 result[key].$count++;
-
-    //                 if (typeof(value) === "object") {
-    //                     if (treatAsArray.indexOf(key) > -1) {
-    //                         let array: any[] = [];
-    //                         for (let k in value) {
-    //                             value[k].$keyEqualsName = k === value[k].name;
-    //                             array.push(value[k]);
-    //                         }
-    //                         value = array;
-    //                     }
-    //                     this.addToResult(result[key], value);
-    //                 }
-    //                 else {
-
-    //                     if (storageValuesFrom.indexOf(key) > -1) {
-    //                         result[key][value] = result[key][value] || 0;
-    //                         result[key][value]++;
-    //                     }
-    //                     else {
-    //                         result[key].$examples = result[key].$examples || [];
-    //                         if (result[key].$examples.length < 5 && result[key].$examples.indexOf(value) === -1) {
-    //                             result[key].$examples.push(value);
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    private createExports(apiList: ui5.API[]): void
+    private createExports(apiList: UI5API.API[]): void
     {
         apiList.forEach(api => api.symbols.forEach(s => this.exportSymbol(s)));
     }
     
-    private exportSymbol(symbol: ui5.Symbol): void
+    private exportSymbol(symbol: UI5API.Symbol): void
     {
         if (symbol.name.match(/^jquery/i))
         {
