@@ -1,7 +1,7 @@
 {
     "version": "0.4.0",
     "name": "openui5-types",
-    "description": "A simple adapter to develop SAPUI5 and OpenUI5 applications using TypeScript and ES2015 modules/classes",
+    "description": "OpenUI5 TypeScript definitions, exports and (optional) runtime annotations.",
     "license": "MIT",
     "keywords": [
         "ui5",
