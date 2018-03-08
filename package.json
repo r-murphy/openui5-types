@@ -35,8 +35,12 @@
         "prepack": "npm run generate && npm run build:lib",
         "start": "npm run generate && npm run build:lib",
         "generate": "npm run build:generator && node src/generator/index.js",
-        "build:generator": "tsc -p src/generator/tsconfig.json",
-        "build:lib": "tsc -p src/lib/tsconfig.json"
+        "build:gen": "tsc -p src/generator/tsconfig.json",
+        "build:gen:watch": "tsc -p src/generator/tsconfig.json -w",
+        "build:lib": "tsc -p src/lib/tsconfig.json",
+        "build:lib:watch": "tsc -p src/lib/tsconfig.json -w",
+        "run:gen": "node src/generator/index.js",
+        "run:gen:inspect": "node --inspect src/generator/index.js"
     },
     "dependencies": {
         "array-includes": "^3.0.3",

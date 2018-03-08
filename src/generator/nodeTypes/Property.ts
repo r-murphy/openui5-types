@@ -5,8 +5,8 @@ import TreeNode     from "./base/TreeNode";
 
 export default class Property extends TreeNode {
 
-    private visibility: ui5.Visibility;
-    private static: boolean;
+    public readonly visibility: ui5.Visibility;
+    public readonly static: boolean;
     private description: string;
     private type: string;
 

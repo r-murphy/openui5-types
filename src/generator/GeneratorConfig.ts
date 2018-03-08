@@ -1,3 +1,4 @@
+import * as UI5API from './ui5api';
 
 export default interface Config {
     local: {
@@ -22,13 +23,19 @@ export default interface Config {
         global:     { [type: string]: string },
         warnings:    string[],
         specific:   {
-            namespaceAsType:                { [namespace:   string]: string },
-            methodParameterType:            { [parameter:   string]: string },
-            methodReturnType:               { [method:      string]: string },
-            propertyType:                   { [property:    string]: string },
+            namespaceAsType:                { [namespace:   string]: string  },
+            methodParameterType:            { [parameter:   string]: string  },
+            methodReturnType:               { [method:      string]: string  },
+            propertyType:                   { [property:    string]: string  },
+            methodParameterOptional:        { [method:      string]: boolean },
+            filterMethods:                  { [method:      string]: boolean },
             methodOverridesNotCompatible:   string[],
             methodReturnTypeNotThis:        string[],
             methodRemoveStatic:             string[],
         }
+    },
+
+    additions: {
+        [library: string]: UI5API.Symbol[]
     }
 }

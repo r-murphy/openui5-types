@@ -5,12 +5,17 @@ import TreeNode from "./base/TreeNode";
 import Property from "./Property";
 import Method   from "./Method";
 
+export interface ClassMaps {
+    byName: Map<string, Class>;
+    byBaseClass: Map<string, Class[]>;
+}
+
 export default class Class extends TreeNode {
-    private description: string;
-    private baseClass: string;
-    private properties: Property[];
-    private methods: Method[];
-    private children: TreeNode[];
+    private readonly description: string;
+    public readonly baseClass: string;
+    public readonly methods: Method[];
+    private readonly properties: Property[];
+    private readonly children: TreeNode[];
 
     constructor(config: Config, apiSymbol: ui5.SymbolClass, children: TreeNode[], indentationLevel: number) {
         super(config, indentationLevel, apiSymbol);
@@ -47,11 +52,52 @@ export default class Class extends TreeNode {
         this.methods.forEach(m => m.generateTypeScriptCode(output));
         output.push(`${this.indentation}}\r\n`);
 
+        this.sortChildren();
+
         if (this.children.length) {
             output.push(`${this.indentation}namespace ${this.name} {\r\n`);
             this.children.forEach(c => c.generateTypeScriptCode(output));
             output.push(`${this.indentation}}\r\n`);
         }
+    }
+
+    private sortChildren() {
+
+        const compareTypes = (c1: TreeNode, c2: TreeNode) => {
+            if (c1 instanceof Property && c2 instanceof Property) return 0;
+            if (c1 instanceof Property) return -1; // Props first
+            if (c2 instanceof Property) return 1; // Props first
+            return 0;
+        };
+        const compareStatics = (c1: any, c2: any) => {
+            if (c1.static && c2.static) return 0;
+            if (c1.static) return -1; // static first
+            if (c2.static) return -1; // static first
+            return 0;
+        };
+        const compareVisibility = (c1: any, c2: any) => {
+            if (c1.visibility === c2.visibility) return 0;
+            if (c1.visibility === ui5.Visibility.Public) return -1;
+            if (c2.visibility === ui5.Visibility.Public) return 1;
+            if (c1.visibility === ui5.Visibility.Protected) return -1;
+            if (c2.visibility === ui5.Visibility.Protected) return 1;
+            return 0;
+        };
+        const compareNames = (c1: TreeNode, c2: TreeNode) => {
+            if (c1.name === "constructor") return -1;
+            if (c2.name === "constructor") return 1;
+            else return c1.name.localeCompare(c2.name);
+        }
+
+        this.children.sort((c1, c2) => {
+            for (let fn of [compareTypes, compareStatics, compareVisibility, compareNames]) {
+                let value = fn(c1, c2);
+                if (value !== 0) {
+                    return value;
+                }
+            }
+            return 0;
+        });
     }
     
     private generateTypeScriptCodeJQuery(output: string[]): void {
@@ -67,114 +113,35 @@ export default class Class extends TreeNode {
         output.push(`${this.indentation}}\r\n`);
     }
 
-
-    //TODO|refactoring: move static methods to another class
-
-    public static fixMethodsOverrides(nodes: TreeNode[]): void {
-        const instancesByName: Map<string, Class> = new Map();
-        const instancesByBaseClass: Map<string, Class[]> = new Map();
-
-        Class.fillInstancesMaps(nodes, instancesByName, instancesByBaseClass);
-
-        for (const baseClassName of instancesByBaseClass.keys()) {
-            const baseClass = instancesByName.get(baseClassName);
-            if (baseClass && !baseClass.baseClass) {
-                Class.fixMethodsOverridesByBaseClass(baseClassName, instancesByName, instancesByBaseClass);
-            }
-        }
+    public static getClassMaps(nodes: TreeNode[]): ClassMaps {
+        let classMaps: ClassMaps = {
+            byName: new Map(),
+            byBaseClass: new Map()
+        };
+        Class.fillClassMaps(nodes, classMaps);
+        return classMaps;
     }
 
-    private static fillInstancesMaps(nodes: TreeNode[], instancesByName: Map<string, Class>, instancesByBaseClass: Map<string, Class[]>): any {
+    private static fillClassMaps(nodes: TreeNode[], classMaps: ClassMaps): any {
         for (const node of nodes) {
             if (node instanceof Class) {
-                if (instancesByName.has(node.fullName)) {
+                if (classMaps.byName.has(node.fullName)) {
                     throw new Error(`Class '${node.fullName}' is already in the map.`);
                 }
-                instancesByName.set(node.fullName, node);
+                classMaps.byName.set(node.fullName, node);
 
                 if (node.baseClass && node.baseClass.match(/\./)) {
-                    const arr = instancesByBaseClass.get(node.baseClass) || [];
+                    const arr = classMaps.byBaseClass.get(node.baseClass) || [];
                     arr.push(node);
-                    instancesByBaseClass.set(node.baseClass, arr);
+                    classMaps.byBaseClass.set(node.baseClass, arr);
                 }
             }
             
             const children = (<any>node).children;
             if (children) {
-                this.fillInstancesMaps(children, instancesByName, instancesByBaseClass);
+                this.fillClassMaps(children, classMaps);
             }
         }
-    }
-
-    private static fixMethodsOverridesByBaseClass(baseClassName: string, instancesByName: Map<string, Class>, instancesByBaseClass: Map<string, Class[]>): void {
-        const baseClass = instancesByName.get(baseClassName);
-        const subClasses = instancesByBaseClass.get(baseClassName);
-        if (baseClass && subClasses) {
-            subClasses.forEach(subClass => Class.fixMethodsOverridesFor(baseClass, subClass, instancesByName, instancesByBaseClass));
-        }
-    }
-
-    // TODO move this to methods by inspecting its parents, and change the method props back to private
-    private static fixMethodsOverridesFor(baseClass: Class, subClass: Class, instancesByName: Map<string, Class>, instancesByBaseClass: Map<string, Class[]>): void {
-        subClass.methods.forEach(method => {
-            const methodOverridden = Class.findMethodInBaseClassHierarchy(baseClass, method, instancesByName);
-            if (methodOverridden) {
-                const returnTypeMethod = method.returnValue.type;
-                const returnTypeMethodOverridden = methodOverridden.returnValue.type;
-
-                let newReturnType: string|undefined;
-                if (!Class.checkTypeCompatibility(returnTypeMethodOverridden, returnTypeMethod, instancesByName)) {
-                    // for "return this" methods
-                    if (returnTypeMethodOverridden === baseClass.fullName) {
-                        if (returnTypeMethod !== subClass.fullName) {
-                            newReturnType = subClass.fullName; // "return this" in this case it's the subClass
-                        }
-                    }
-                    // for "return somethingElse" methods
-                    else {
-                        newReturnType = methodOverridden.returnValue.type;
-                    }
-                }
-
-                if (newReturnType && newReturnType !== "any" && method.returnValue.type !== "this") {
-                    //console.log(`${method.fullName}: Replacing return type from '${method.returnValue.type}' to '${newReturnType}' to match the same method in base class '${baseClass.fullName}'.`);
-                    method.returnValue.type = newReturnType;
-                }
-
-                if (methodOverridden.visibility === ui5.Visibility.Public && method.visibility === ui5.Visibility.Protected) {
-                    method.visibility = ui5.Visibility.Public;
-                }
-            }
-        });
-
-        Class.fixMethodsOverridesByBaseClass(subClass.fullName, instancesByName, instancesByBaseClass);
-    }
-
-    private static findMethodInBaseClassHierarchy(baseClass: Class|undefined, method: Method, instancesByName: Map<string, Class>): Method|undefined {
-        if (!baseClass) return;
-
-        const baseBaseClass = instancesByName.get(baseClass.baseClass);
-        return baseClass.methods.find(baseMethod => (baseMethod.name === method.name && baseMethod.static === method.static)) || Class.findMethodInBaseClassHierarchy(baseBaseClass, method, instancesByName);
-    }
-
-    private static checkTypeCompatibility(baseType: string, subType: string, instancesByName: Map<string, Class>): boolean {
-        if (baseType === subType) {
-            return true;
-        }
-
-        const baseClass = instancesByName.get(baseType);
-        let subClass = instancesByName.get(subType);
-
-        if (baseClass && subClass) {
-            do {
-                if (subClass.name === baseClass.name) {
-                    return true;
-                }
-                subClass = instancesByName.get(subClass.baseClass);
-            } while(subClass);
-        }
-
-        return false;
     }
 
     public compare(other: Class) {

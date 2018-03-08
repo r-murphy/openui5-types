@@ -3,6 +3,7 @@ import Config       from "../../GeneratorConfig";
 import TreeNode     from "./TreeNode";
 import Namespace    from "../Namespace";
 import Class        from "../Class";
+import Method       from "../Method";
 import Interface    from "../Interface";
 import Enum         from "../Enum";
 import Typedef      from "../Typedef";
@@ -13,32 +14,10 @@ export default class TreeBuilder {
     {
         symbols.sort((a, b) => a.name.localeCompare(b.name));
         let rootNodes = TreeBuilder.createNodeChildren(config, symbols, 0);
-        // let rootNodes = TreeBuilder.createTree2(config, symbols, 0);
-        Class.fixMethodsOverrides(rootNodes);
+        let classMaps = Class.getClassMaps(rootNodes);
+        Method.fixMethodsOverrides(classMaps);
         return rootNodes;
     }
-
-    // private static createTree2(config: Config, symbols: ui5.Symbol[]): TreeNode[] {
-    //     let childrenMap: {[parentName: string]: Array<ui5.Symbol> } = {};
-    //     for (let symbol of symbols) {
-    //         // let { name } = symbol;
-    //         childrenMap[symbol.name] = [];
-    //         let parentName = symbol.name.split(".").slice(0, -1).join(".");
-    //         // console.log(name, "<", parentName)
-    //         let children = childrenMap[parentName];
-    //         if (children) {
-    //             children.push(symbol);
-    //         }
-    //     }
-    //     console.log("---------------------------------------------------------------------------------------------------------")
-    //     let rootNodes: TreeNode[] = [];
-    //     for (let symbol of symbols) {
-    //         let { name } = symbol;
-    //         let children = childrenMap[name] || [];
-    //         console.log(symbol.name, "~~", children.map(c => c.name).join(","))
-    //     }
-    //     return rootNodes;
-    // }
 
     private static createNodeChildren(config: Config, symbols: ui5.Symbol[], indentationLevel: number): TreeNode[]
     {
