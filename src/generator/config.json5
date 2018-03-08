@@ -5,8 +5,8 @@
     },
 
     "output": {
-        "exportsPath":      "./dist/exports/",
-        "definitionsPath":  "./dist/types/",
+        "exportsPath":      "./dist/{{VERSION}}/",
+        "definitionsPath":  "./dist/{{VERSION}}/",
         "indentation":      "    "
     },
 
@@ -14,8 +14,8 @@
         "apiBaseUrl":   "https://sapui5.hana.ondemand.com/{{VERSION}}/test-resources",
         "jsonLocation": "designtime/api.json",
         "versions": [
-            // "1.48.19",
-            // "1.50.9",
+            "1.48.19",
+            "1.50.9",
             "1.52.7"
         ],
         "namespaces": [

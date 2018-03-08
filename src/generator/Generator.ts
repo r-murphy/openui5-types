@@ -8,6 +8,8 @@ import TreeBuilder    from './nodeTypes/base/TreeBuilder';
 import Config         from './GeneratorConfig';
 import { getApiJson } from './util/ApiFetcher';
 
+const versionMarker = "{{VERSION}}";
+
 export default class Generator
 {
     private config: Config;
@@ -46,8 +48,9 @@ export default class Generator
     
     private generateFromDesignTimeApi(apiList: UI5API.API[], version: string): void
     {
+        version = version.split(".").slice(0, -1).join("."); // major.minor
         this.applyAdditions(apiList);
-        this.createExports(apiList);
+        this.createExports(apiList, version);
         this.createDefinitions(apiList, version);
     }
 
@@ -64,47 +67,50 @@ export default class Generator
     private createDefinitions(apiList: UI5API.API[], version: string): void
     {
         let allSymbols = apiList.map(api => api.symbols).reduce((a, b) => a.concat(b));
-
         let rootNodes = TreeBuilder.createFromSymbolsArray(this.config, allSymbols);
+        let baseDefinitionsPath = this.config.output.definitionsPath.replace(versionMarker, version);
+        let indexContent: string[] = [];
         for (let node of rootNodes) {
             let output: string[] = [];
             let tsCode = node.generateTypeScriptCode(output);
-            this.createFile(`${this.config.output.definitionsPath}${version.replace(/[.]\d+$/, "")}/${node.fullName}.d.ts`, output.join(""));
+            let filename = `${node.fullName}.d.ts`;
+            this.createFile(`${baseDefinitionsPath}/${filename}`, output.join(""));
+            indexContent.push(`/// <reference path="./${filename}" />`)
         }
 
-        // Uncomment this to see the details, statistics and example values of the different types of API members
-        // this.printApiData(allSymbols);
+        this.createFile(`${baseDefinitionsPath}/index.d.ts`, indexContent.join("\n"));
     }
 
-    private createExports(apiList: UI5API.API[]): void
+    private createExports(apiList: UI5API.API[], version : string): void
     {
-        apiList.forEach(api => api.symbols.forEach(s => this.exportSymbol(s)));
+        apiList.forEach(api => api.symbols.forEach(s => this.exportSymbol(s, version)));
     }
     
-    private exportSymbol(symbol: UI5API.Symbol): void
+    private exportSymbol(symbol: UI5API.Symbol, version: string): void
     {
         if (symbol.name.match(/^jquery/i))
         {
             return;
         }
+        let basePath = this.config.output.exportsPath.replace(versionMarker, version);
     
         if (symbol.kind == "namespace" && symbol.name.replace(/[.]/g, "/") === symbol.module)
         {
-            let path = this.config.output.exportsPath + symbol.resource.replace(/[.]js$/g, ".d.ts");
+            let path = basePath + symbol.resource.replace(/[.]js$/g, ".d.ts");
             let content = `export default ${symbol.name};`
     
             this.createFile(path, content);
         }
         else if (symbol.kind === "class")
         {
-            let path = this.config.output.exportsPath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
+            let path = basePath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
             let content = `export default ${symbol.name};`
     
             this.createFile(path, content);
         }
         else if (symbol.kind === "enum")
         {
-            let path = this.config.output.exportsPath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
+            let path = basePath + symbol.name.replace(/[.]/g, "/") + ".d.ts";
             let content = `export default ${symbol.name};`
             
             this.createFile(path, content);
