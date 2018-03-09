@@ -23,6 +23,8 @@ export default class Method extends TreeNode {
     private readonly parentKind: ui5.Kind;
     private readonly parentName: string;
 
+    private readonly deprecated?: ui5.DeprecatedInfo;
+
     private ignore = false;
 
     constructor(config: Config, method: ui5.Method, parentName: string, indentationLevel: number, parentKind: ui5.Kind) {
@@ -44,6 +46,7 @@ export default class Method extends TreeNode {
         this.parameters = (method.parameters || []).map(p => new Parameter(this.config, p, this.fullName));
         this.parentKind = parentKind;
         this.parentName = parentName;
+        this.deprecated = method.deprecated;
 
         let returnTypeReplacement = this.getConfig(config.replacements.specific.methodReturnType);
         
@@ -195,6 +198,15 @@ export default class Method extends TreeNode {
 
         if (!returnValue.types.isVoid()) {
             docInfo.push(`@returns {${returnValue.types.generateTypeScriptCode()}} ${returnValue.description}`.replace(/\r\n|\r|\n/g, " "));
+        }
+
+        if (this.deprecated) {
+            let deprecated = [ 
+                "@deprecated",
+                this.deprecated.since && `Since version ${this.deprecated.since}.`, 
+                this.deprecated.text
+            ].filter(t => t).join(" ");
+            docInfo.push(deprecated);
         }
 
         super.printTsDoc(output, description, docInfo);
