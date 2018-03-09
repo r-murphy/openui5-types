@@ -2,13 +2,14 @@ import * as ui5     from "../ui5api";
 import Config       from "../GeneratorConfig";
 import TypeUtil     from "../util/TypeUtil";
 import TreeNode     from "./base/TreeNode";
+import Types        from "./Type";
 
 export default class Property extends TreeNode {
 
     public readonly visibility: ui5.Visibility;
     public readonly static: boolean;
-    private description: string;
-    private type: string;
+    private readonly description: string;
+    private readonly types: Types;
 
     private parentKind: ui5.Kind;
 
@@ -21,13 +22,17 @@ export default class Property extends TreeNode {
 
         let typeReplacement = config.replacements.specific.propertyType[this.fullName];
 
-        this.type = typeReplacement || TypeUtil.replaceTypes(property.type, config, this.fullName);
+        this.types = new Types(typeReplacement || TypeUtil.replaceTypes(property.type, config, this.fullName));
 
         this.parentKind = parentKind;
     }
 
     public generateTypeScriptCode(output: string[]): void {
         let declaration: string;
+
+        if (this.shouldIgnore()) {
+            return;
+        }
         
         switch (this.parentKind) {
             case ui5.Kind.Namespace:
@@ -48,6 +53,14 @@ export default class Property extends TreeNode {
         }
 
         this.printTsDoc(output, this.description);
-        output.push(`${this.indentation}${declaration}${this.name}: ${this.type};\r\n`);
+        output.push(`${this.indentation}${declaration}${this.name}: ${this.types.generateTypeScriptCode()};\r\n`);
     }
+
+    private shouldIgnore() {
+        if (this.static && this.config.ignore.ignoreStaticProperties.has(this.fullName)) {
+            return true;
+        }
+        return false;
+    }
+
 }

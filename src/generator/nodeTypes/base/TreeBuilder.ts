@@ -29,7 +29,7 @@ export default class TreeBuilder {
             .forEach(n => namespaces.add(n));
 
         for (var namespace of namespaces) {
-            if (config.ignore.indexOf(namespace) === -1) {
+            if (!config.ignore.ignoreNamespaces.has(namespace)) {
                 let parentSymbol = symbols.find(s => s.name === namespace) || <ui5.SymbolNamespace>{
                     kind: ui5.Kind.Namespace
                     , visibility: ui5.Visibility.Public

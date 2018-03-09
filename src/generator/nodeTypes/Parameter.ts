@@ -1,17 +1,20 @@
+
 import * as ui5 from "../ui5api";
-import Config   from "../GeneratorConfig";
+import Config, { StringMap }   from "../GeneratorConfig";
 import TypeUtil from "../util/TypeUtil";
+import Types    from "./Type";
 
 export default class Parameter {
 
     private constructorArgs: any[];
 
     private name: string;
-    private type: string;
-    // private types = new Set<string>();
+    private readonly types: Types;
     private optional: boolean;
-    private spread: boolean;
-    private description: string;
+    private readonly spread: boolean;
+    private readonly description: string;
+
+    // private readonly parentName: string;
 
     constructor(config: Config, parameter: ui5.Parameter, parentName: string) {
         // save constructor arguments to reinstantiate if needed
@@ -20,30 +23,38 @@ export default class Parameter {
         let parameterFullName = `${parentName}.${parameter.name}`;
         let parentBaseName = parentName.split(".").pop() as string;
 
-        let parameterTypeReplacement = this.getConfigValue(config.replacements.specific.methodParameterType, parameterFullName, parameter.name, parentBaseName);
+        let parameterTypeReplacement = this.getConfig(config.replacements.specific.methodParameterType, parameterFullName, parameter.name, parentBaseName);
 
-        if (!parameter.optional && this.getConfigValue(config.replacements.specific.methodParameterOptional, parameterFullName, parameter.name, parentBaseName)) {
+        if (!parameter.optional && this.getConfig(config.replacements.specific.methodParameterOptional, parameterFullName, parameter.name, parentBaseName)) {
             parameter.optional = true;
         }
 
         this.name = parameter.name;
-        this.type = TypeUtil.replaceTypes(parameterTypeReplacement || parameter.type, config, parameterFullName);
+        this.types = new Types(TypeUtil.replaceTypes(parameterTypeReplacement || parameter.type, config, parameterFullName));
         this.optional = parameter.optional || false;
         this.spread = parameter.spread || false;
         this.description = parameter.description || "";
+        // this.parentName = parentName;
     }
 
-    private getConfigValue(map: any, parameterFullName: string, parameterName: string, parentBaseName: string) {
-        return map[parameterFullName] || map[`*.${parentBaseName}.${parameterName}`] || map[`*.${parameterName}`];
+    private getConfig(obj: StringMap, parameterFullName: string, parameterName: string, parentBaseName: string): string | undefined;
+    private getConfig(obj: Set<string>, parameterFullName: string, parameterName: string, parentBaseName: string) : boolean;
+    private getConfig(obj: StringMap | Set<string>, parameterFullName: string, parameterName: string, parentBaseName: string): any | undefined {
+        if (obj instanceof Set) {
+            return obj.has(parameterFullName) || obj.has(`*.${parentBaseName}.${parameterName}`) || obj.has(`*.${parameterName}`);
+        }
+        else {
+            return obj[parameterFullName] || obj[`*.${parentBaseName}.${parameterName}`] || obj[`*.${parameterName}`];
+        }
     }
 
     public getTypeScriptCode(): string {
-        return `${this.spread ? "..." : ""}${this.name.replace(/<[^>]+>/g, "")}${this.optional ? "?" : ""}: ${this.type}`;
+        return `${this.spread ? "..." : ""}${this.name.replace(/<[^>]+>/g, "")}${this.optional ? "?" : ""}: ${this.types.generateTypeScriptCode()}`;
     }
 
     public getTsDoc(): string {
         let description = this.description ? ` - ${this.description}` : "";
-        return `@param {${this.type}} ${this.name}${description}`;
+        return `@param {${this.types.generateTypeScriptCode()}} ${this.name}${description}`;
     }
 
     public isOptional(): boolean {
@@ -66,49 +77,21 @@ export default class Parameter {
     }
 
     public isCompatible(other: Parameter): boolean {
-        // hacky for now to handle constructor overloads.
-        // TODO implement a proper compatible check with more types
-        if (this.type === other.type) {
-            return true;
-        }
-        if (other.hasAny()) {
-            return true;
-        }
-        if (this.type.split("|").some(t => other.hasType(t.trim()))) {
-            return true;
-        }
-        if (this.hasArray() && other.hasAnyArray()) {
-            return true;
-        }
-        // if (other.hasType("object"))
-        // if (other.type === "any[]" || this.type === "any[]") return true;
-        // else if (this.type === "string" && other.type === "any") return false;
-        // else if (this.type === "any")
-        else return false;
-    }
-
-    private hasType(type: string): boolean {
-        return this.type.split("|").some(t => t.trim() === type);
-    }
-
-    private hasAny() {
-        return this.hasType("any");
-    }
-
-    private hasAnyArray() {
-        return this.hasType("any[]") || this.hasType("Array<any>");
+        return this.types.isCompatibleForParameter(other.types);
     }
 
     public addAny() {
-        this.type += "|any";
+        this.types.addAny();
     }
 
-    private hasArray() {
-        return /(\[\])|Array/.test(this.type);
+    isEquivalent(other: Parameter): boolean {
+        if (!this.types.isEqual(other.types)) return false;
+        if (this.optional !== other.optional) return false;
+        // if (this.name.toLowerCase() !== other.name.toLowerCase()) {
+        //     console.log(`Paramter ${this.parentName}.${this.name} was equivalent except in name to ${other.parentName}.${other.name}`);
+        //     return false;
+        // }
+        return true;
     }
-
-    // public isTypeEqual(other: Parameter): boolean {
-    //     return (this.type === other.type);
-    // }
 
 }

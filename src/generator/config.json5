@@ -7,15 +7,15 @@
     "output": {
         "exportsPath":      "./dist/{{VERSION}}/",
         "definitionsPath":  "./dist/{{VERSION}}/",
-        "indentation":      "    "
+        "indentation":      "  "
     },
 
     "input": {
         "apiBaseUrl":   "https://sapui5.hana.ondemand.com/{{VERSION}}/test-resources",
         "jsonLocation": "designtime/api.json",
         "versions": [
-            "1.48.19",
-            "1.50.9",
+            // "1.48.19",
+            // "1.50.9",
             "1.52.7"
         ],
         "namespaces": [
@@ -35,16 +35,48 @@
         ]
     },
 
-    "ignore": [
-        "jQuery.Event",
-        "jQuery.support" // This conflicts with jQuery's own types
-    ],
+    "ignore": {
 
-    "ignoreStatic": [
-        "sap.m.NotificationListBase.setDatetime",
-        "sap.m.NotificationListItem.setDatetime",
-        "sap.m.Text.getText",
-    ],
+        "ignoreNamespaces": [
+            "jQuery.Event",
+            "jQuery.support" // This conflicts with jQuery's own types
+        ],
+
+        "smartStaticMethodFixing": [
+            "sap.m.BusyDialog",
+            "sap.m.FlexBox",
+            "sap.m.FlexItemData",
+            "sap.m.IconTabBar",
+            "sap.m.RadioButtonGroup",
+            "sap.m.Text",
+            "sap.m.Title",
+        ],
+
+        "smartStaticMethodFixingAllowedMethods": [
+            "getMetadata",
+            "extend",
+            "sap.m.Text.hasNativeLineClamp"
+        ],
+
+        "ignoreStaticProperties": [
+            "sap.m.IconTabBar.getShowSelection",
+            "sap.m.IconTabBar.setSelectedKey"
+        ],
+
+        "ignoreMethods": [
+            "sap.m.BusyDialog.getDomRef",
+            "sap.m.SelectDialog.addStyleClass",
+            "sap.m.TableSelectDialog.addStyleClass",
+            "sap.m.ViewSettingsDialog.addStyleClass",
+            "sap.ui.core.Element.clone",
+        ],
+
+        "ignoreStaticMethods": [
+            "sap.m.NotificationListBase.setDatetime",
+            "sap.m.NotificationListItem.setDatetime",
+        ],
+
+    },
 
     "replacements": {
         "global": {
@@ -89,23 +121,19 @@
             "sap.m.LightBox":                                     "any",
         },
 
-        "warnings": [
-            "Function",
-            "any",
-            "any[]",
-            "Promise<any>",
-            "JQueryPromise<any>",
-            "IterableIterator<any>"
-        ],
+        // "warnings": [
+        //     "Function",
+        //     "any",
+        //     "any[]",
+        //     "Promise<any>",
+        //     "JQueryPromise<any>",
+        //     "IterableIterator<any>"
+        // ],
 
         "specific": {
 
-            "filterMethods": {
-                "sap.m.BusyDialog.getDomRef":                             true,
-                "sap.m.SelectDialog.addStyleClass":                       true,
-                "sap.m.TableSelectDialog.addStyleClass":                  true,
-                "sap.m.ViewSettingsDialog.addStyleClass":                 true,
-                "sap.ui.core.Element.clone":                              true,
+            "baseClass": {
+                "sap.ui.base.ManagedObjectMetadata":                      "sap.ui.base.Metadata",
             },
 
             "namespaceAsType": {
@@ -125,44 +153,41 @@
                 "sap.uxap.BlockBaseColumnLayout":                         "\"auto\"|1|2|3|4",
             },
 
-            "methodRemoveStatic": [
+            "methodRemoveStaticQualifier": [ // removes the 'static' word, not the method. use ignoreStatic for that
                 "*.clone",
                 "*.bindAggregation",
                 "*.unbindAggregation",
-                "sap.m.IconTabBar.destroyAggregation",
-                "sap.m.Text.getTextDomRef",
-                "sap.m.BusyDialog.open",
-                "sap.m.BusyDialog.close",
             ],
 
-            methodVisibilityPublic: {
-                "*.$"                                                     : true,
-                "*.getDomRef"                                             : true, 
-            },
+            methodVisibilityPublic: [
+                "*.$",
+                "*.getDomRef"
+            ],
 
-            "methodParameterOptional": {
+            "methodParameterOptional": [
                 // module.method.parameter
-                "jQuery.sap.getModulePath.sSuffix":                       true,
-                "jQuery.sap.syncGetJSON.data":                            true,
-                "jQuery.sap.syncGetText.data":                            true,
-                "sap.m.BusyDialog.close.isClosedFromUserInteraction":     true,
-                "sap.m.Dialog.insertButton.iIndex":                       true,
-                "sap.ui.model.Context.getPath.sPath":                     true,
-                "sap.ui.model.Context.getProperty.sPath":                 true,
-                "sap.ui.model.json.JSONModel.constructor.oData":          true,
-                "sap.ui.model.json.JSONModel.constructor.bObserve":       true,
+                "jQuery.sap.getModulePath.sSuffix",
+                "jQuery.sap.syncGetJSON.data",
+                "jQuery.sap.syncGetText.data",
+                "sap.m.BusyDialog.close.isClosedFromUserInteraction",
+                "sap.m.BusyDialog.setShowCancelButton.isCancelButtonShown",
+                "sap.m.Dialog.insertButton.iIndex",
+                "sap.ui.model.Context.getPath.sPath",
+                "sap.ui.model.Context.getProperty.sPath",
+                "sap.ui.model.json.JSONModel.constructor.oData",
+                "sap.ui.model.json.JSONModel.constructor.bObserve",
                 // *.method.parameter
-                "*.fireEvent.mParameters":                                true,
-                "*.openBy.oControl":                                      true,
-                "*.openBy.bWithKeyboard":                                 true,
+                "*.fireEvent.mParameters",
+                "*.openBy.oControl",
+                "*.openBy.bWithKeyboard",
                 // *.parameter
-                "*.bForceUpdate":                                         true,
-                "*.bSkipInstanceManager":                                 true,
-                "*.oBackData":                                            true,
-                "*.oListener":                                            true,
-                "*.oTransitionParameter":                                 true,
-                "*.oTransitionParameters":                                true,
-            },
+                "*.bForceUpdate",
+                "*.bSkipInstanceManager",
+                "*.oBackData",
+                "*.oListener",
+                "*.oTransitionParameter",
+                "*.oTransitionParameters",
+            ],
 
             "methodParameterType": {
                 // module.method.parameter
@@ -198,6 +223,7 @@
                 "*.getFocusDomRef":                                                           "HTMLElement",
                 // module.method
                 "sap.m.ActionListItem.getMode":                                               "string",
+                "sap.m.BusyDialog.getTooltip":                                                "sap.ui.core.TooltipBase | string", // match core.Control
                 "sap.m.Input.setWidth":                                                       "this",
                 "sap.m.OverflowToolbar._getVisibleAndNonOverflowContent":                     "sap.ui.core.Control[]",
                 "sap.m.P13nConditionPanel.getKeyFields":                                      "{ key: string, text: string }[]",

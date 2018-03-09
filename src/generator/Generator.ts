@@ -1,9 +1,7 @@
 
 import * as fs        from 'fs';
-import * as Path      from 'path';
 import * as JSON5     from 'json5';
 import * as UI5API    from './ui5api';
-import TreeNode       from './nodeTypes/base/TreeNode';
 import TreeBuilder    from './nodeTypes/base/TreeBuilder';
 import Config         from './GeneratorConfig';
 import { getApiJson } from './util/ApiFetcher';
@@ -17,6 +15,20 @@ export default class Generator
     public constructor(configPath: string) {
         let jsonConfig      = fs.readFileSync(configPath, { encoding: "utf-8" });
         this.config         = JSON5.parse(jsonConfig);
+        Generator.setifyConfig(this.config.ignore);
+        Generator.setifyConfig(this.config.replacements.specific);
+    }
+
+    private static setifyConfig(config: {[key: string]: any}) {
+        for (let key of Object.keys(config)) {
+            let val = config[key];
+            if (Array.isArray(val)) {
+                config[key] = new Set(val);
+            }
+            else if (typeof val === "object") {
+                Generator.setifyConfig(val);
+            }
+        }
     }
 
     public async generate(): Promise<void>
@@ -72,7 +84,7 @@ export default class Generator
         let indexContent: string[] = [];
         for (let node of rootNodes) {
             let output: string[] = [];
-            let tsCode = node.generateTypeScriptCode(output);
+            node.generateTypeScriptCode(output);
             let filename = `${node.fullName}.d.ts`;
             this.createFile(`${baseDefinitionsPath}/${filename}`, output.join(""));
             indexContent.push(`/// <reference path="./${filename}" />`)

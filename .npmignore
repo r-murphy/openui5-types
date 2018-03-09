@@ -1,6 +1,7 @@
-.vscode
+.vscode/
 .editorconfig
 .gitattributes
 tsconfig.json
-src/generator
-ui5ts-*.tgz
+src/
+*.tgz
+build/

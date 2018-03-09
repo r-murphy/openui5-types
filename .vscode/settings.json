@@ -8,7 +8,6 @@
         "**/*.js": {
             "when": "$(basename).ts"
         },
-        "node_modules": true
     },
     "typescript.tsdk": "node_modules/typescript/lib",
 
@@ -20,5 +19,8 @@
         "typings",
         "build",
         "**/*.d.ts",
+    ],
+    "cSpell.words": [
+        "setify"
     ]
 }
