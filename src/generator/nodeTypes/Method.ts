@@ -26,6 +26,7 @@ export default class Method extends TreeNode {
     private readonly deprecated?: ui5.DeprecatedInfo;
 
     private ignore = false;
+    private needsCompatibility = false;
 
     constructor(config: Config, method: ui5.Method, parentName: string, indentationLevel: number, parentKind: ui5.Kind) {
         super(config, indentationLevel, method.name, parentName);
@@ -80,7 +81,7 @@ export default class Method extends TreeNode {
     }
 
     private printCompatibilityMethodOverload(output: string[]): void {
-        if (this.config.replacements.specific.methodOverridesNotCompatible.has(this.fullName)) {
+        if (this.needsCompatibility || this.config.replacements.specific.methodOverridesNotCompatible.has(this.fullName)) {
             let symbol: ui5.Parameter = {
                 name: "args",
                 type: "any[]",
@@ -89,10 +90,7 @@ export default class Method extends TreeNode {
             let parameters = [new Parameter(this.config, symbol, this.fullName)];
             let returnValue = { types: new Types("any"), description: "" };
 
-            let description = `This method overload is here just for compatibility reasons to avoid compiler errors,
-                because UI5 API doesn't follow all TypeScript method override rules.
-                Don't use it. If the definitions are wrong, please open an issue in https://github.com/lmcarreiro/ui5ts/issues instead.`;
-
+            let description = `This method overload is here just for compatibility reasons to avoid compiler errors because UI5 API  doesn't follow all TypeScript method overload rules.`;
             this.printMethodTsDoc(output, description, parameters, returnValue);
             this.print(output, parameters, returnValue);
         }
@@ -112,15 +110,25 @@ export default class Method extends TreeNode {
      */
     private printMethodOverloads(output: string[], parameters: Parameter[]): void {
         if (parameters.length > 1) {
-            // let firstOptionalIndex: number|undefined;
+            let firstOptionalIndex = -1;
             for (let i = 1; i < parameters.length; i++) { // starts at index 1
-                let previous = parameters[i-1];
+                let previousIndex = i - 1;
+                let previous = parameters[previousIndex];
                 let current = parameters[i];
                 
                 if (previous.isOptional()) {
+                    if (firstOptionalIndex === -1) {
+                        firstOptionalIndex = previousIndex;
+                    }
                     if (current.isRequired()) {
+                        let numberOfOptionals = i - firstOptionalIndex;
+                        if (numberOfOptionals > 1 && !this.needsCompatibility) {
+                            // console.log(`Need to add compatibility for ${this.fullName}`);
+                            this.needsCompatibility = true;
+                        }
                         this.printMethodOverloads(output, parameters.filter((p, k) => (k >= i || p.isRequired()))); // remove all optional before the current
-                        this.printMethodOverloads(output, parameters.map((p, k) => ((k >= i || p.isRequired()) ? p : p.asRequired())));
+                        // this.printMethodOverloads(output, parameters.filter((p, k) => (p.isRequired() || k < firstOptionalIndex))); // remove first optional
+                        this.printMethodOverloads(output, parameters.map((p, k) => (p.isRequired() || (k >= i) ? p : p.asRequired())));
                         return; // don't print the default parameters since ts doesn't allow optional before required.
                     }
                     else if (!current.isCompatible(previous)) {

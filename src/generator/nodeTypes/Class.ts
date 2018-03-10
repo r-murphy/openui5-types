@@ -49,11 +49,11 @@ export default class Class extends TreeNode {
                 }
                 // non-allowed static method. see if it exists as an instance method to either remove it or fix it.
                 if (methodSymbols.some(m2 => !m2.static && m2.name === m.name)) {
-                    console.log(`Removing duplicate static method ${fullName}.${m.name}`);
+                    // console.log(`Removing static method ${fullName}.${m.name}`);
                     return false;
                 }
                 else {
-                    console.log(`Fixing static method ${fullName}.${m.name}`);
+                    // console.log(`Fixing static method ${fullName}.${m.name}`);
                     m.static = false;
                     return true;
                 }
