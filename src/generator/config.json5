@@ -11,12 +11,13 @@
     },
 
     "input": {
-        "apiBaseUrl":   "https://sapui5.hana.ondemand.com/{{VERSION}}/test-resources",
+        "apiBaseUrl":   "https://openui5nightly.hana.ondemand.com/{{VERSION}}/test-resources",
         "jsonLocation": "designtime/api.json",
         "versions": [
             // "1.48.19",
             // "1.50.9",
-            "1.52.7"
+            "1.52.7",
+            "1.54.1"
         ],
         "namespaces": [
             "sap/ui/core",
@@ -191,11 +192,13 @@
 
             "methodParameterType": {
                 // module.method.parameter
+                "sap.f.DynamicPageTitle.setAreaShrinkRatio.sAreaShrinkRatio":                 "string",
                 "sap.m.P13nConditionPanel.setKeyFields.aKeyFields":                           "{ key: string, text: string }[]",
                 "sap.m.TimePicker.setMinutesStep.iStep":                                      "number",
                 "sap.m.TimePicker.setSecondsStep.iStep":                                      "number",
                 "sap.ui.base.ManagedObject.propagateMessages.aMessages":                      "string[]",
                 "sap.ui.base.ManagedObject.findAggregatedObjects.fnCondition":                "(child: sap.ui.core.Control) => boolean",
+                "sap.ui.base.ManagedObjectMetadata.loadDesignTime.oManagedObject":            "sap.ui.base.ManagedObject", // new issue in 1.54
                 "sap.ui.commons.DatePicker.fireChange.bInvalidValue":                         "any", // Fixes incompatible inheritance
                 "sap.ui.core.Element.fireEvent.mParameters":                                  "any", // Fixes incompatible inheritance
                 "sap.ui.core.delegate.ScrollEnablement.setGrowingList.sScrollLoadDirection":  "string",
@@ -222,9 +225,16 @@
                 "*.getDomRef":                                                                "HTMLElement",
                 "*.getFocusDomRef":                                                           "HTMLElement",
                 // module.method
+                "sap.f.DynamicPageTitle.getAreaShrinkRatio":                                  "string",
                 "sap.m.ActionListItem.getMode":                                               "string",
                 "sap.m.BusyDialog.getTooltip":                                                "sap.ui.core.TooltipBase | string", // match core.Control
                 "sap.m.Input.setWidth":                                                       "this",
+                "sap.m.MessageBox.alert":                                                     "void", // https://github.com/SAP/openui5/issues/1938
+                "sap.m.MessageBox.confirm":                                                   "void", // https://github.com/SAP/openui5/issues/1938
+                "sap.m.MessageBox.error":                                                     "void", // https://github.com/SAP/openui5/issues/1938
+                "sap.m.MessageBox.information":                                               "void", // https://github.com/SAP/openui5/issues/1938
+                "sap.m.MessageBox.success":                                                   "void", // https://github.com/SAP/openui5/issues/1938
+                "sap.m.MessageBox.warning":                                                   "void", // https://github.com/SAP/openui5/issues/1938
                 "sap.m.OverflowToolbar._getVisibleAndNonOverflowContent":                     "sap.ui.core.Control[]",
                 "sap.m.P13nConditionPanel.getKeyFields":                                      "{ key: string, text: string }[]",
                 "sap.ui.base.Object.getMetadata":                                             "sap.ui.base.Metadata",

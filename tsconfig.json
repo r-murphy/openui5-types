@@ -10,9 +10,12 @@
         "strictNullChecks": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "typeRoots": [
+            "./dist/1.54"
+        ]
     },
     "exclude": [
-        // "./dist"
+        "./dist/1.52"
     ]
 }
