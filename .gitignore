@@ -6,3 +6,4 @@ ui5ts-*.tgz
 /test-resources/
 /build/
 *.log
+yarn.lock
