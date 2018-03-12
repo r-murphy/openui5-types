@@ -14,10 +14,12 @@
         "apiBaseUrl":   "https://openui5nightly.hana.ondemand.com/{{VERSION}}/test-resources",
         "jsonLocation": "designtime/api.json",
         "versions": [
+            // "1.38.33", // fails on sap/f
+            "1.44.28",
             // "1.48.19",
             // "1.50.9",
             "1.52.8",
-            // "1.54.1"
+            "1.54.1"
         ],
         "namespaces": [
             "sap/ui/core",
@@ -66,6 +68,7 @@
 
         "ignoreMethods": [
             "sap.m.BusyDialog.getDomRef",
+            "sap.m.P13nColumnsPanel.insertItem", // Broken inheritance in 1.44. Method is removed in 1.52.
             "sap.m.SelectDialog.addStyleClass",
             "sap.m.TableSelectDialog.addStyleClass",
             "sap.m.ViewSettingsDialog.addStyleClass",
@@ -154,7 +157,7 @@
                 "sap.uxap.BlockBaseColumnLayout":                         "\"auto\"|1|2|3|4",
             },
 
-            "methodRemoveStaticQualifier": [ // removes the 'static' word, not the method. use ignoreStatic for that
+            "methodRemoveStaticQualifier": [ // Removes the 'static' word, not the method. use ignoreStatic for that
                 "*.clone",
                 "*.bindAggregation",
                 "*.unbindAggregation",
@@ -173,6 +176,7 @@
                 "sap.m.BusyDialog.close.isClosedFromUserInteraction",
                 "sap.m.BusyDialog.setShowCancelButton.isCancelButtonShown",
                 "sap.m.Dialog.insertButton.iIndex",
+                "sap.ui.core.Control.invalidate.oOrigin", // for UI5 1.44
                 "sap.ui.model.Context.getPath.sPath",
                 "sap.ui.model.Context.getProperty.sPath",
                 "sap.ui.model.json.JSONModel.constructor.oData",
