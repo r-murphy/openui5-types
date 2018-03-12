@@ -4,9 +4,9 @@ OpenUI5 TypeScript definitions, exports and (optional) runtime annotations.
 
 ## Release Notes
 
-**0.4.0** - Fork, rename and update. UI5 1.48, UI5 1.50, 1.52
+**0.4.0** - Fork, rename and update. UI5 1.38, 1.44, 1.52, 1.54.
 
-**0.3.0** - Create definitions for more than one version of UI5 (just 1.46 and 1.48 for now). Published in https://github.com/lmcarreiro/ui5-typescript-definitions too. *Be carefull, now that there is these definitions inside the package and I have plans to make these definitions better (normally replacing an `any` type with a more specific one), **almost all new versions from now on may be a breaking change.***
+**0.3.0** - Create definitions for more than one version of UI5 (just 1.46 and 1.48 for now). *Be careful, now that there is these definitions inside the package and I have plans to make these definitions better (normally replacing an `any` type with a more specific one), **almost all new versions from now on may be a breaking change.***
 
 **0.2.0** - Create my own UI5 definitions generator, because the available ones didn't fit my needs (you can still use another, just set it up in your `tsconfig.json`).
 
@@ -23,7 +23,7 @@ It is very simple, make it work with only 4 steps:
 
 ### 1) Install `openui5-types`, `typescript` and `@types/jquery` npm packages
 
-```
+```sh
 npm install @types/jquery --save-dev
 npm install typescript --save-dev
 npm install openui5-types --save
@@ -34,14 +34,15 @@ npm install openui5-types --save
 * Add the `sap/*` paths:
 
 Example of `tsconfig.json` file:
+
 ```json
 {
-	"compilerOptions": {
+    "compilerOptions": {
         "target": "esnext",
         "module": "ESNext",
         "strict": true,
         "strictPropertyInitialization": false,
-   	    "noUnusedLocals": true,
+        "noUnusedLocals": true,
         "noUnusedParameters": true,
         "baseUrl": "./",
         "outDir": ".build/ts-out",
@@ -53,7 +54,7 @@ Example of `tsconfig.json` file:
         "your/app/namespace/*": [
             "./src/*"
         ]
-    },    
+    },
     "files": [
         "node_modules/openui5-types/dist/types/1.52/index.d.ts"
     ],
@@ -70,6 +71,7 @@ Example of `tsconfig.json` file:
 ### Resolving common typescript errors and module resolution problems
 
 **Problem:** Doesn't find your own `*.ts` class:
+
 ```typescript
 ...
 // error TS2307: Cannot find module 'your/app/namespace/folder/ClassName'.
@@ -78,6 +80,7 @@ import ClassName from "your/app/namespace/folder/ClassName";
 ```
 
 **Solution:** Make sure you have the path of your namespace root in the `tsconfig.json` and if it match with your application startup in the `index.html`
+
 ```diff
 ...
 "compilerOptions": {
@@ -91,6 +94,7 @@ import ClassName from "your/app/namespace/folder/ClassName";
 ```
 
 **Problem:** Doesn't find a class in sap.* namespace:
+
 ```typescript
 ...
 // error TS2307: Cannot find module 'sap/ui/core/UIComponent'.
@@ -113,5 +117,3 @@ import UIComponent from "sap/ui/core/UIComponent";
 ```
 
 If the problem still remains, please, create an issue in the github project.
-
-
