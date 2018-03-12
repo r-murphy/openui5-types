@@ -16,15 +16,15 @@
         "versions": [
             // "1.48.19",
             // "1.50.9",
-            "1.52.7",
-            "1.54.1"
+            "1.52.8",
+            // "1.54.1"
         ],
         "namespaces": [
             "sap/ui/core",
             "sap/ui/unified",
             "sap/ui/commons",
             "sap/ui/demokit",
-            "sap/ui/dt",
+            // "sap/ui/dt",
             "sap/ui/layout",
             "sap/ui/suite",
             "sap/ui/table",

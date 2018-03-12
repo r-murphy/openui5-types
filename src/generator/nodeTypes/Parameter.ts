@@ -14,7 +14,7 @@ export default class Parameter {
     private readonly spread: boolean;
     private readonly description: string;
 
-    // private readonly parentName: string;
+    private readonly parentName: string;
 
     constructor(config: Config, parameter: ui5.Parameter, parentName: string) {
         // save constructor arguments to reinstantiate if needed
@@ -34,7 +34,7 @@ export default class Parameter {
         this.optional = parameter.optional || false;
         this.spread = parameter.spread || false;
         this.description = parameter.description || "";
-        // this.parentName = parentName;
+        this.parentName = parentName;
     }
 
     private getConfig(obj: StringMap, parameterFullName: string, parameterName: string, parentBaseName: string): string | undefined;
@@ -92,6 +92,15 @@ export default class Parameter {
         //     return false;
         // }
         return true;
+    }
+
+    static combine(config: Config, parameters: Parameter[], optional?: boolean): Parameter {
+        let description = ""
+        return new Parameter(config, {
+            name: parameters.map(p => p.name).join("_or_"),
+            type: parameters.map(p => p.types.generateTypeScriptCode()).join("|"),
+            optional,
+        }, parameters[0].parentName);
     }
 
 }

@@ -80,8 +80,8 @@ export default class Class extends TreeNode {
     private generateTypeScriptCodeSap(output: string[]): void {
         let extend = this.baseClass ? ` extends ${this.baseClass}` : "";
 
-        Class.sort(this.properties);
-        Class.sort(this.methods);
+        // Class.sort(this.properties);
+        // Class.sort(this.methods);
 
         this.printTsDoc(output, this.description);
         output.push(`${this.indentation}export class ${this.name}${extend} {\r\n`);

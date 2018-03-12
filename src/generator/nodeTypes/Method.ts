@@ -77,22 +77,27 @@ export default class Method extends TreeNode {
         if (this.shouldIgnore()) return;
         this.printMethodTsDoc(output, this.description, this.parameters, this.returnValue);
         this.printMethodOverloads(output, this.parameters || []);
-        this.printCompatibilityMethodOverload(output);
+        this.printCompatibilityMethodOverload(output, this.parameters);
     }
 
-    private printCompatibilityMethodOverload(output: string[]): void {
+    private printCompatibilityMethodOverload(output: string[], originalParameters: Parameter[]): void {
         if (this.needsCompatibility || this.config.replacements.specific.methodOverridesNotCompatible.has(this.fullName)) {
             let symbol: ui5.Parameter = {
                 name: "args",
                 type: "any[]",
                 spread: true
             };
-            let parameters = [new Parameter(this.config, symbol, this.fullName)];
+            let compatibilityParameters = [new Parameter(this.config, symbol, this.fullName)];
             let returnValue = { types: new Types("any"), description: "" };
 
-            let description = `This method overload is here just for compatibility reasons to avoid compiler errors because UI5 API  doesn't follow all TypeScript method overload rules.`;
-            this.printMethodTsDoc(output, description, parameters, returnValue);
-            this.print(output, parameters, returnValue);
+            let description = [
+                `This method overload is here just for compatibility reasons to avoid compiler errors because`,
+                ` UI5 API doesn't follow all TypeScript method overload rules.\n`,
+                originalParameters.map(p => p.getTypeScriptCode()).join(", ")
+            ].join("");
+            
+            this.printMethodTsDoc(output, description, compatibilityParameters, returnValue);
+            this.print(output, compatibilityParameters, returnValue);
         }
     }
 
@@ -121,19 +126,58 @@ export default class Method extends TreeNode {
                         firstOptionalIndex = previousIndex;
                     }
                     if (current.isRequired()) {
+
                         let numberOfOptionals = i - firstOptionalIndex;
-                        if (numberOfOptionals > 1 && !this.needsCompatibility) {
-                            // console.log(`Need to add compatibility for ${this.fullName}`);
-                            this.needsCompatibility = true;
+
+                        let beforeOptionals = parameters.filter((p, j) => (j < firstOptionalIndex));
+                        let optionals = parameters.filter((p, j) => (j >= firstOptionalIndex && j < i));
+                        let afterOptionals = parameters.filter((p, j) => (j >= i));
+
+                        // Print it once with all the parameters as required.
+                        this.printMethodOverloads(output, [
+                            ...beforeOptionals,
+                            ...optionals.map(p => p.asRequired()),
+                            ...afterOptionals
+                        ]);
+                        // Print it once with all the optionals removed
+                        this.printMethodOverloads(output, [
+                            ...beforeOptionals,
+                            ...afterOptionals
+                        ]);
+
+                        if (numberOfOptionals === 1) {
+                            return;
+                            // This is an easy case. Just remove the optional.
+                            // this.printMethodOverloads(output, parameters.filter((p, k) => (k >= i || p.isRequired())));
                         }
-                        this.printMethodOverloads(output, parameters.filter((p, k) => (k >= i || p.isRequired()))); // remove all optional before the current
-                        // this.printMethodOverloads(output, parameters.filter((p, k) => (p.isRequired() || k < firstOptionalIndex))); // remove first optional
-                        this.printMethodOverloads(output, parameters.map((p, k) => (p.isRequired() || (k >= i) ? p : p.asRequired())));
+                        else if (numberOfOptionals === 2) {
+                            // Merge the optional params
+                            this.printMethodOverloads(output, [
+                                ...beforeOptionals,
+                                Parameter.combine(this.config, optionals, false),
+                                ...afterOptionals
+                            ]);
+                        }
+                        else {
+                            // this.printMethodOverloads(output, parameters.filter((p, k) => (k >= i || p.isRequired()))); // remove all optional before the current
+                            // this.printMethodOverloads(output, parameters.filter((p, k) => (p.isRequired() || k < firstOptionalIndex))); // remove first optional
+                            // for (let optionalParamCount = 1; optionalParamCount < numberOfOptionals; optionalParamCount++) {
+                            //     this.printMethodOverloads(output, [
+                            //         ...beforeOptionals,
+                            //         ...afterOptionals
+                            //     ]);
+                            // }
+                            if (!this.needsCompatibility) {
+                                // console.log(`Need to add compatibility for ${this.fullName}`);
+                                this.needsCompatibility = true;
+                            }
+                        }
+                        
                         return; // don't print the default parameters since ts doesn't allow optional before required.
                     }
-                    else if (!current.isCompatible(previous)) {
-                        previous.addAny(); // this isn't the 'best' solution, but it's by far the easiest.
-                    }
+                    // else if (!current.isCompatible(previous)) {
+                    //     previous.addAny(); // this isn't the 'best' solution, but it's by far the easiest.
+                    // }
                 }
             }
         }

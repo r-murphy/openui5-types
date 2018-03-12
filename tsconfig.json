@@ -15,7 +15,10 @@
             "./dist/1.54"
         ]
     },
-    "exclude": [
+    "include": [
         "./dist/1.52"
+    ],
+    "exclude": [
+        
     ]
 }
