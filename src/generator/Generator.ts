@@ -95,17 +95,25 @@ export default class Generator
 
     private createExports(apiList: UI5API.API[], version : string): void
     {
-        apiList.forEach(api => api.symbols.forEach(s => this.exportSymbol(s, version)));
+        let basePath = this.config.output.exportsPath.replace(versionMarker, version);
+        for (let api of apiList) {
+            for (let symbol of api.symbols) {
+                this.exportSymbol(basePath, symbol);
+            }
+        }
+        for (let additional of this.config.additionalExports) {
+            let path = `${basePath}${additional.path.replace(/[.]/g, "/")}.d.ts`;
+            let content = `export default ${additional.type};`
+            this.createFile(path, content);
+        }
     }
     
-    private exportSymbol(symbol: UI5API.Symbol, version: string): void
+    private exportSymbol(basePath: string, symbol: UI5API.Symbol): void
     {
         if (symbol.name.match(/^jquery/i))
         {
             return;
         }
-        let basePath = this.config.output.exportsPath.replace(versionMarker, version);
-    
         if (symbol.kind == "namespace" && symbol.name.replace(/[.]/g, "/") === symbol.module)
         {
             let path = basePath + symbol.resource.replace(/[.]js$/g, ".d.ts");

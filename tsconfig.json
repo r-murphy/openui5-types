@@ -12,11 +12,11 @@
         "noImplicitThis": true,
         "sourceMap": true,
         "typeRoots": [
-            "./dist/1.54"
+            "./dist/types/1.52"
         ]
     },
     "include": [
-        "./dist/1.52"
+        "./dist/types/1.52"
     ],
     "exclude": [
         

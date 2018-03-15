@@ -35,7 +35,12 @@ export default interface Config {
     additions: {
         [library: string]: UI5API.Symbol[]
     },
-    
+
+    additionalExports: [{
+        path: string;
+        type: string;
+    }],
+
     replacements: {
         global:                                 { [type: string]: string },
         // warnings:                            Set<string>
