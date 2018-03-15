@@ -173,10 +173,17 @@
                 "jQuery.sap.getModulePath.sSuffix",
                 "jQuery.sap.syncGetJSON.data",
                 "jQuery.sap.syncGetText.data",
+                // sap.m
                 "sap.m.BusyDialog.close.isClosedFromUserInteraction",
                 "sap.m.BusyDialog.setShowCancelButton.isCancelButtonShown",
                 "sap.m.Dialog.insertButton.iIndex",
+                "sap.m.ListBase.setSelectedItem.bSelect",
+                "sap.m.ListBase.setSelectedItemById.bSelect",
+                "sap.m.Tokenizer.selectAllTokens.bSelect",
+                // sap.ui.core
                 "sap.ui.core.Control.invalidate.oOrigin", // for UI5 1.44
+                "sap.ui.core.mvc.Controller.constructor.sName",
+                // sap.ui.model
                 "sap.ui.model.Context.getPath.sPath",
                 "sap.ui.model.Context.getProperty.sPath",
                 "sap.ui.model.json.JSONModel.constructor.oData",
@@ -241,10 +248,13 @@
                 "sap.m.MessageBox.warning":                                                   "void", // https://github.com/SAP/openui5/issues/1938
                 "sap.m.OverflowToolbar._getVisibleAndNonOverflowContent":                     "sap.ui.core.Control[]",
                 "sap.m.P13nConditionPanel.getKeyFields":                                      "{ key: string, text: string }[]",
+                "sap.ui.base.ManagedObject.findAggregatedObjects":                            "sap.ui.base.ManagedObject[]",
                 "sap.ui.base.Object.getMetadata":                                             "sap.ui.base.Metadata",
                 "sap.ui.commons.AutoComplete.getListBox":                                     "sap.ui.core.ID",
                 "sap.ui.core.Element._getMediaContainerWidth":                                "number|{undefined}",
-                "sap.ui.base.ManagedObject.findAggregatedObjects":                            "sap.ui.base.ManagedObject[]",
+                "sap.ui.model.resource.ResourceModel.getResourceBundle":                      "Promise<typeof jQuery.sap.util.ResourceBundle> | typeof jQuery.sap.util.ResourceBundle",
+                "sap.ui.model.Model.getObject":                                               "any", // from void
+                "sap.ui.model.Model.getProperty":                                             "any", // from void
                 // 'this' overrides where the api had a parent type
                 "sap.ui.commons.layout.ResponsiveFlowLayoutData.setMargin":                   "this",
                 "sap.m.Input.setShowValueStateMessage":                                       "this",
