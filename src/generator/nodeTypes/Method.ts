@@ -116,7 +116,7 @@ export default class Method extends TreeNode {
     private printMethodOverloads(output: string[], parameters: Parameter[]): void {
         if (parameters.length > 1) {
             let firstOptionalIndex = -1;
-            for (let i = 1; i < parameters.length; i++) { // starts at index 1
+            for (let i = 1; i < parameters.length; i++) { // starts at index 1, and we'll look back to the previous
                 let previousIndex = i - 1;
                 let previous = parameters[previousIndex];
                 let current = parameters[i];
@@ -125,6 +125,7 @@ export default class Method extends TreeNode {
                     if (firstOptionalIndex === -1) {
                         firstOptionalIndex = previousIndex;
                     }
+
                     if (current.isRequired()) {
 
                         let numberOfOptionals = i - firstOptionalIndex;
@@ -133,22 +134,22 @@ export default class Method extends TreeNode {
                         let optionals = parameters.filter((p, j) => (j >= firstOptionalIndex && j < i));
                         let afterOptionals = parameters.filter((p, j) => (j >= i));
 
-                        // Print it once with all the parameters as required.
+                        // Print it with all the parameters as required.
                         this.printMethodOverloads(output, [
                             ...beforeOptionals,
                             ...optionals.map(p => p.asRequired()),
                             ...afterOptionals
                         ]);
-                        // Print it once with all the optionals removed
+                        
+                        // Print it with all the optionals removed
                         this.printMethodOverloads(output, [
                             ...beforeOptionals,
                             ...afterOptionals
                         ]);
 
                         if (numberOfOptionals === 1) {
+                            // Nothing to do.
                             return;
-                            // This is an easy case. Just remove the optional.
-                            // this.printMethodOverloads(output, parameters.filter((p, k) => (k >= i || p.isRequired())));
                         }
                         else if (numberOfOptionals === 2) {
                             // Merge the optional params
@@ -159,25 +160,32 @@ export default class Method extends TreeNode {
                             ]);
                         }
                         else {
-                            // this.printMethodOverloads(output, parameters.filter((p, k) => (k >= i || p.isRequired()))); // remove all optional before the current
-                            // this.printMethodOverloads(output, parameters.filter((p, k) => (p.isRequired() || k < firstOptionalIndex))); // remove first optional
-                            // for (let optionalParamCount = 1; optionalParamCount < numberOfOptionals; optionalParamCount++) {
-                            //     this.printMethodOverloads(output, [
-                            //         ...beforeOptionals,
-                            //         ...afterOptionals
-                            //     ]);
-                            // }
                             if (!this.needsCompatibility) {
                                 // console.log(`Need to add compatibility for ${this.fullName}`);
                                 this.needsCompatibility = true;
                             }
                         }
-                        
                         return; // don't print the default parameters since ts doesn't allow optional before required.
                     }
-                    // else if (!current.isCompatible(previous)) {
-                    //     previous.addAny(); // this isn't the 'best' solution, but it's by far the easiest.
-                    // }
+                    else if (i === (parameters.length - 1)) {
+                        let numberOfPreviousOptionals = i - firstOptionalIndex;
+                        let beforeOptionals = parameters.filter((p, j) => (j < firstOptionalIndex));
+                        if (numberOfPreviousOptionals > 1) {
+                            // console.log(`Adding compatibility to ${this.fullName}`);
+                            // TODO see if the params are all compatible from right to left. i.e. method(a?: any[], b?: any[], c?: any)
+                            this.needsCompatibility = true;
+                        }
+                        else if (!current.isCompatible(previous)) {
+                            // i.e. constructor(sId?: string, aSettings?: any)
+                            this.printMethodOverloads(output, [
+                                ...beforeOptionals,
+                                current,
+                            ]);
+                        }
+                        // else 2 right-to-left shift compatible params. i.e. method(a?: any, b?: string)
+
+                        // no return here. print the default too with all the trailing optional params.
+                    }
                 }
             }
         }
