@@ -36,12 +36,12 @@
     "scripts": {
         "prepack": "npm run generate",
         "start": "npm run generate",
-        "generate": "npm run build:gen && node src/generator/index.js",
-        "build:gen": "tsc -p src/generator/tsconfig.json",
-        "build:gen:watch": "tsc -p src/generator/tsconfig.json -w",
-        "build:ann": "tsc -p src/annotations/tsconfig.json",
-        "build:ann:watch": "tsc -p src/annotations/tsconfig.json -w",
-        "run:gen": "node src/generator/index.js",
-        "run:gen:inspect": "node --inspect src/generator/index.js"
+        "generate": "npm run gen:build && node src/generator/index.js",
+        "gen:build": "tsc -p src/generator/tsconfig.json",
+        "gen:build:watch": "tsc -p src/generator/tsconfig.json -w",
+        "gen:run": "node src/generator/index.js",
+        "gen:inspect": "node --inspect src/generator/index.js",
+        "ann:build": "tsc -p src/annotations/tsconfig.json",
+        "ann:build:watch": "tsc -p src/annotations/tsconfig.json -w"
     }
 }
