@@ -2,8 +2,7 @@ node_modules
 *.js
 *.js.map
 *.d.ts
-ui5ts-*.tgz
-/test-resources/
-/build/
+*.tgz
 *.log
+build/
 yarn.lock

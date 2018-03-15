@@ -1,5 +1,5 @@
 {
-    "version": "0.4.0",
+    "version": "0.4.1",
     "name": "openui5-types",
     "description": "OpenUI5 TypeScript definitions, exports and (optional) runtime annotations.",
     "license": "MIT",
@@ -34,13 +34,13 @@
         "typescript": "^2.7.2"
     },
     "scripts": {
-        "prepack": "npm run generate && npm run build:lib",
-        "start": "npm run generate && npm run build:lib",
-        "generate": "npm run build:generator && node src/generator/index.js",
+        "prepack": "npm run generate",
+        "start": "npm run generate",
+        "generate": "npm run build:gen && node src/generator/index.js",
         "build:gen": "tsc -p src/generator/tsconfig.json",
         "build:gen:watch": "tsc -p src/generator/tsconfig.json -w",
-        "build:lib": "tsc -p src/lib/tsconfig.json",
-        "build:lib:watch": "tsc -p src/lib/tsconfig.json -w",
+        "build:ann": "tsc -p src/annotations/tsconfig.json",
+        "build:ann:watch": "tsc -p src/annotations/tsconfig.json -w",
         "run:gen": "node src/generator/index.js",
         "run:gen:inspect": "node --inspect src/generator/index.js"
     }

@@ -4,4 +4,4 @@
 tsconfig.json
 src/
 *.tgz
-build/
+build

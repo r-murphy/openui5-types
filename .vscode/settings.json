@@ -4,7 +4,6 @@
     "editor.detectIndentation": false,
     "files.exclude": {
         "**/.git": true,
-        "**/*.js.map": true,
         "**/*.js": {
             "when": "$(basename).ts"
         },
