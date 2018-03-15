@@ -5,8 +5,8 @@
     },
 
     "output": {
-        "exportsPath":      "./dist/{{VERSION}}/",
-        "definitionsPath":  "./dist/{{VERSION}}/",
+        "exportsPath":      "./dist/{{VERSION}}/exports/",
+        "definitionsPath":  "./dist/{{VERSION}}/types/",
         "indentation":      "  "
     },
 
@@ -173,6 +173,7 @@
                 "jQuery.sap.getModulePath.sSuffix",
                 "jQuery.sap.syncGetJSON.data",
                 "jQuery.sap.syncGetText.data",
+                "jQuery.sap.getUriParameters.sUri",
                 // sap.m
                 "sap.m.BusyDialog.close.isClosedFromUserInteraction",
                 "sap.m.BusyDialog.setShowCancelButton.isCancelButtonShown",
@@ -295,7 +296,15 @@
         }
     },
 
+    additionalExports: [
+        {
+            path: "jquery.sap.global",
+            type: "jQuery"
+        }
+    ],
+
     additions: {
+
         "sap.m": [
             {
                 "kind": "namespace",
@@ -347,5 +356,11 @@
                 ]
             }
         ]
+    },
+    /*
+    TODO 
+    declare interface JQuerySapUtilUriParameters {
+      get(string: string): undefined | string;
     }
+    */
 }
