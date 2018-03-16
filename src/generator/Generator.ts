@@ -102,7 +102,7 @@ export default class Generator
             }
         }
         for (let additional of this.config.additionalExports) {
-            let path = `${basePath}${additional.path.replace(/[.]/g, "/")}.d.ts`;
+            let path = `${basePath}${additional.path}.d.ts`;
             let content = `export default ${additional.type};`
             this.createFile(path, content);
         }

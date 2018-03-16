@@ -21,8 +21,15 @@ export default class Namespace extends TreeNode {
         this.apiSymbol = apiSymbol;
         
         this.description = apiSymbol.description || "";
-        this.properties = (apiSymbol.properties || []).map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, this.isJQueryNamespace ? ui5.Kind.Interface : ui5.Kind.Namespace));
-        this.methods    = (apiSymbol.methods    || []).map(m => new Method  (this.config, m, this.fullName, indentationLevel + 1, this.isJQueryNamespace ? ui5.Kind.Interface : ui5.Kind.Namespace));
+
+        const properties = apiSymbol.properties || [];
+        if (config.additionalProperties[this.fullName]) {
+            properties.push(...config.additionalProperties[this.fullName]);
+        }
+        this.properties = properties
+            .map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, this.isJQueryNamespace ? ui5.Kind.Interface : ui5.Kind.Namespace));
+        this.methods    = (apiSymbol.methods    || [])
+            .map(m => new Method  (this.config, m, this.fullName, indentationLevel + 1, this.isJQueryNamespace ? ui5.Kind.Interface : ui5.Kind.Namespace));
         this.setChildren(children);
     }
 

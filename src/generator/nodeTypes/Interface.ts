@@ -20,8 +20,15 @@ export default class Interface extends TreeNode {
 
         this.description = apiSymbol.description || "";
         this.baseClass = apiSymbol.extends || "";
-        this.properties = (apiSymbol.properties || []).map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Interface));
-        this.methods    = (apiSymbol.methods    || []).map(m => new Method  (this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Interface));
+
+        const properties = apiSymbol.properties || [];
+        if (config.additionalProperties[this.fullName]) {
+            properties.push(...config.additionalProperties[this.fullName]);
+        }
+        this.properties = properties
+            .map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Interface));
+        this.methods    = (apiSymbol.methods    || [])
+            .map(m => new Method  (this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Interface));
     }
 
     public generateTypeScriptCode(output: string[]): void {

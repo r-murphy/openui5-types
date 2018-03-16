@@ -41,6 +41,10 @@ export default interface Config {
         type: string;
     }],
 
+    additionalProperties: {
+        [parent: string]: UI5API.Property[];
+    },
+
     replacements: {
         global:                                 { [type: string]: string },
         // warnings:                            Set<string>

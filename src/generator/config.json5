@@ -7,7 +7,7 @@
     "output": {
         "exportsPath":      "./dist/{{VERSION}}/exports/",
         "definitionsPath":  "./dist/{{VERSION}}/types/",
-        "indentation":      "  "
+        "indentation":      "  ",
     },
 
     "input": {
@@ -15,11 +15,11 @@
         "jsonLocation": "designtime/api.json",
         "versions": [
             // "1.38.33", // fails on sap/f
-            "1.44.28",
+            // "1.44.28",
             // "1.48.19",
             // "1.50.9",
             "1.52.8",
-            "1.54.1"
+            // "1.54.1"
         ],
         "namespaces": [
             "sap/ui/core",
@@ -298,10 +298,23 @@
 
     additionalExports: [
         {
-            path: "jquery.sap.global",
+            path: "jquery.sap.global", // intentional dots
             type: "jQuery"
         }
     ],
+
+    additionalProperties: {
+        "sap.ui.test.Opa5": [
+            {
+                static: true,
+                optional: false,
+                name: "assert",
+                type: "Assert",
+                visibility: "public",
+                description: "",
+            }
+        ]
+    },
 
     additions: {
 
@@ -355,7 +368,10 @@
                     },
                 ]
             }
-        ]
+        ],
+        // "sap.ui.core": {
+
+        // }
     },
     /*
     TODO 

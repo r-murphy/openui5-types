@@ -27,7 +27,13 @@ export default class Class extends TreeNode {
         let baseClassReplacement = this.getReplacement(config.replacements.specific.baseClass);
 
         this.baseClass = baseClassReplacement || (apiSymbol.extends ? TypeUtil.replaceTypes(apiSymbol.extends, config, this.fullName)  : "");
-        this.properties = (apiSymbol.properties || []).map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Class));
+
+        const properties = apiSymbol.properties || [];
+        if (config.additionalProperties[this.fullName]) {
+            properties.push(...config.additionalProperties[this.fullName]);
+        }
+        this.properties = properties
+            .map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Class));
 
         this.methods = Class.filterMethodSymbols(config, apiSymbol.name, apiSymbol.methods || [])
             .map(m => new Method(config, m, this.fullName, indentationLevel + 1, ui5.Kind.Class));

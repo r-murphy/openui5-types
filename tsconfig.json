@@ -12,11 +12,15 @@
         "noImplicitThis": true,
         "sourceMap": true,
         "typeRoots": [
-            "./dist/types/1.52"
+            "./dist/types/1.52",
+            "node_modules/@types"
         ]
     },
+    "files": [
+        "./node_modules/@types/qunit/index.d.ts"
+    ],
     "include": [
-        "./dist/types/1.52"
+        "./dist/types/1.52",
     ],
     "exclude": [
         
