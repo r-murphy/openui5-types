@@ -2,6 +2,7 @@
 .editorconfig
 .gitattributes
 tsconfig.json
+tslint.json
 src/
 *.tgz
 build
