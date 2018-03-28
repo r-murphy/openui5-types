@@ -1,8 +1,8 @@
 
 import * as ui5 from "../ui5api";
-import Config, { StringMap }   from "../GeneratorConfig";
+import Config, { StringMap } from "../GeneratorConfig";
 import TypeUtil from "../util/TypeUtil";
-import Types    from "./Type";
+import Types from "./Type";
 
 export default class Parameter {
 
@@ -38,12 +38,11 @@ export default class Parameter {
     }
 
     private getConfig(obj: StringMap, parameterFullName: string, parameterName: string, parentBaseName: string): string | undefined;
-    private getConfig(obj: Set<string>, parameterFullName: string, parameterName: string, parentBaseName: string) : boolean;
+    private getConfig(obj: Set<string>, parameterFullName: string, parameterName: string, parentBaseName: string): boolean;
     private getConfig(obj: StringMap | Set<string>, parameterFullName: string, parameterName: string, parentBaseName: string): any | undefined {
         if (obj instanceof Set) {
             return obj.has(parameterFullName) || obj.has(`*.${parentBaseName}.${parameterName}`) || obj.has(`*.${parameterName}`);
-        }
-        else {
+        } else {
             return obj[parameterFullName] || obj[`*.${parentBaseName}.${parameterName}`] || obj[`*.${parameterName}`];
         }
     }
@@ -70,8 +69,8 @@ export default class Parameter {
             throw new Error("This parameter is already required");
         }
 
-        var parameterConstructor: { new(...args: any[]): Parameter } = Parameter;
-        var parameterAsRequired = new parameterConstructor(...this.constructorArgs);
+        let parameterConstructor: { new(...args: any[]): Parameter } = Parameter;
+        let parameterAsRequired = new parameterConstructor(...this.constructorArgs);
         parameterAsRequired.optional = false;
         return parameterAsRequired;
     }
@@ -84,7 +83,7 @@ export default class Parameter {
         this.types.addAny();
     }
 
-    isEquivalent(other: Parameter): boolean {
+    public isEquivalent(other: Parameter): boolean {
         if (!this.types.isEqual(other.types)) return false;
         if (this.optional !== other.optional) return false;
         // if (this.name.toLowerCase() !== other.name.toLowerCase()) {
@@ -94,11 +93,11 @@ export default class Parameter {
         return true;
     }
 
-    static combine(config: Config, parameters: Parameter[], optional?: boolean): Parameter {
-        let description = ""
+    public static combine(config: Config, parameters: Parameter[], optional?: boolean): Parameter {
+        let description = "";
         return new Parameter(config, {
-            name: parameters.map(p => p.name).join("_or_"),
-            type: parameters.map(p => p.types.generateTypeScriptCode()).join("|"),
+            name: parameters.map((p) => p.name).join("_or_"),
+            type: parameters.map((p) => p.types.generateTypeScriptCode()).join("|"),
             optional,
         }, parameters[0].parentName);
     }

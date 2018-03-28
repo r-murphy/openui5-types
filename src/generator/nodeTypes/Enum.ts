@@ -1,6 +1,7 @@
-import * as ui5     from "../ui5api";
-import Config       from "../GeneratorConfig";
-import TreeNode     from "./base/TreeNode";
+
+import * as ui5 from "../ui5api";
+import Config from "../GeneratorConfig";
+import TreeNode from "./base/TreeNode";
 import EnumProperty from "./EnumProperty";
 
 export default class Enum extends TreeNode {
@@ -16,16 +17,16 @@ export default class Enum extends TreeNode {
         }
 
         this.description = apiSymbol.description || "";
-        this.properties = (apiSymbol.properties || []).map(p => new EnumProperty(this.config, p, this.fullName, indentationLevel + 1));
+        this.properties = (apiSymbol.properties || []).map((p) => new EnumProperty(this.config, p, this.fullName, indentationLevel + 1));
     }
 
     public generateTypeScriptCode(output: string[]): void {
-        let declareOrExport = this.isJQueryNamespace ? "declare " : "export "
+        let declareOrExport = this.isJQueryNamespace ? "declare " : "export ";
         let name = this.isJQueryNamespace ? this.getJQueryFullName() : this.name;
 
         this.printTsDoc(output, this.description);
         output.push(`${this.indentation}${declareOrExport}enum ${name} {\r\n`);
-        this.properties.forEach(p => p.generateTypeScriptCode(output));
+        this.properties.forEach((p) => p.generateTypeScriptCode(output));
         output.push(`${this.indentation}}\r\n`);
     }
 }

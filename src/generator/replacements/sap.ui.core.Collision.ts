@@ -10,5 +10,5 @@ export enum Collision {
     None        = "none",
     NoneFlip    = "none flip",
     NoneFit     = "none fit",
-    NoneNone    = "none none"
+    NoneNone    = "none none",
 }

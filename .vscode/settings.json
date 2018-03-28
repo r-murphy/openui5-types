@@ -20,6 +20,8 @@
         "**/*.d.ts",
     ],
     "cSpell.words": [
+        "qunit",
         "setify"
-    ]
+    ],
+    "tslint.autoFixOnSave": true
 }

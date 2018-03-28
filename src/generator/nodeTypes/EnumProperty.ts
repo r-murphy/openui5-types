@@ -1,5 +1,5 @@
 import * as ui5 from "../ui5api";
-import Config   from "../GeneratorConfig";
+import Config from "../GeneratorConfig";
 import TreeNode from "./base/TreeNode";
 
 export default class EnumProperty extends TreeNode {

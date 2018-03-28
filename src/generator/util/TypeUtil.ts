@@ -1,23 +1,23 @@
 import Config from "../GeneratorConfig";
 
 export default {
-    replaceTypes,
     getJQueryFullName,
-    splitTypeString
+    replaceTypes,
+    splitTypeString,
 };
 
 function replaceTypes(type: string, config: Config, name: string): string {
     let types = splitTypeString(type);
 
-    for (let k in types) {
-        let isArray = !!types[k].match(/.*\[\]$/);
-        let t = types[k].replace(/\[\]$/, "");
+    types.forEach((t, i) => {
+        let isArray = !!t.match(/.*\[\]$/);
+        t = t.replace(/\[\]$/, "");
 
         let replacement = config.replacements.global[t];
 
         // warnings when using types that could be more specific
         // if (replacement && config.replacements.warnings.indexOf(replacement) > -1) {
-            //console.log(`Replacing '${t}'${t !== type ? ` (in '${type}')` : ""} with '${replacement}' in '${name}'.`);
+            // console.log(`Replacing '${t}'${t !== type ? ` (in '${type}')` : ""} with '${replacement}' in '${name}'.`);
         // }
 
         t = replacement || t;
@@ -25,14 +25,13 @@ function replaceTypes(type: string, config: Config, name: string): string {
         if (t.match(/^jQuery[.]/)) {
             if (name.match(/^jQuery[.]/)) {
                 t = getJQueryFullName(t);
-            }
-            else {
+            } else {
                 t = `typeof ${t}`;
             }
         }
 
-        types[k] = t + (isArray ? "[]" : "");
-    }
+        types[i] = t + (isArray ? "[]" : "");
+    });
 
     return types.join("|");
 }
@@ -42,7 +41,7 @@ function getJQueryFullName(fullName: string): string {
         ? "JQueryStatic"
         : fullName
             .split(".")
-            .map(p => p[0].toUpperCase() + p.slice(1))
+            .map((p) => p[0].toUpperCase() + p.slice(1))
             .join("");
 }
 
@@ -50,12 +49,12 @@ function getJQueryFullName(fullName: string): string {
  * The naive approach to parse a type string is to split by '|'.
  * But in some case the '|' char is inside generics, so we'll account for that as well.
  * And in worst case, we can have nested generics.
-  "any | any[] | Promise<one> | Promise<Array<one|two>> | Array<one> | Array<one|two>"
- * @param str 
+ * "any | any[] | Promise<one> | Promise<Array<one|two>> | Array<one> | Array<one|two>"
+ * @param str
  */
 function splitTypeString(str: string): string[] {
     if (!str.includes("<")) {
-        return str.split("|").map(s => s.trim());
+        return str.split("|").map((s) => s.trim());
     }
 
     let types: string[] = [];
@@ -68,20 +67,17 @@ function splitTypeString(str: string): string[] {
         if (index === -1) {
             types.push(str.substring(lastSplitter));
             break;
-        }
-        else if (token === "<") {
+        } else if (token === "<") {
             genericDepth++;
-        }
-        else if (token === ">") {
+        } else if (token === ">") {
             genericDepth--;
-        }
-        else if (genericDepth === 0) {
-            types.push(str.substring(lastSplitter, index))
+        } else if (genericDepth === 0) {
+            types.push(str.substring(lastSplitter, index));
             lastSplitter = index + 1;
         }
         nextPosition = index + 1;
     }
-    return types.map(t => t.trim());
+    return types.map((t) => t.trim());
 }
 
 //  | Promise<one> | Promise<Array<one|two>> | Array<one> | Array<one|two>
@@ -93,14 +89,13 @@ function nextIndexOfToken(str: string, position: number, tokens = ["|", "<", ">"
         let newIndex = str.indexOf(t, position);
         if (newIndex === -1) {
             return;
-        }
-        else if (theIndex === -1 || newIndex < theIndex) {
+        } else if (theIndex === -1 || newIndex < theIndex) {
             theIndex = newIndex;
             theToken = t;
         }
     });
     return {
+        index: theIndex,
         token: theToken,
-        index: theIndex
     };
 }

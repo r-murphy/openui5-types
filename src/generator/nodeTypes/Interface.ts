@@ -1,8 +1,8 @@
 import * as ui5 from "../ui5api";
-import Config   from "../GeneratorConfig";
+import Config from "../GeneratorConfig";
 import TreeNode from "./base/TreeNode";
 import Property from "./Property";
-import Method   from "./Method";
+import Method from "./Method";
 
 export default class Interface extends TreeNode {
 
@@ -26,9 +26,9 @@ export default class Interface extends TreeNode {
             properties.push(...config.additionalProperties[this.fullName]);
         }
         this.properties = properties
-            .map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Interface));
+            .map((m) => new Property(this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Interface));
         this.methods    = (apiSymbol.methods    || [])
-            .map(m => new Method  (this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Interface));
+            .map((m) => new Method  (this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Interface));
     }
 
     public generateTypeScriptCode(output: string[]): void {
@@ -38,8 +38,8 @@ export default class Interface extends TreeNode {
 
         this.printTsDoc(output, this.description);
         output.push(`${this.indentation}${declareOrExport}interface ${name}${extend} {\r\n`);
-        this.properties.forEach(p => p.generateTypeScriptCode(output));
-        this.methods.forEach(m => m.generateTypeScriptCode(output));
+        this.properties.forEach((p) => p.generateTypeScriptCode(output));
+        this.methods.forEach((m) => m.generateTypeScriptCode(output));
         output.push(`${this.indentation}}\r\n`);
     }
 

@@ -1,24 +1,24 @@
 
-export interface API {
+export interface UI5API {
     library: string;
-    symbols: Symbol[];
+    symbols: UI5Symbol[];
     version: string;
 }
 
-export type Symbol = SymbolNamespace|SymbolClass|SymbolEnum|SymbolInterface|SymbolTypedef;
+export type UI5Symbol = SymbolNamespace|SymbolClass|SymbolEnum|SymbolInterface|SymbolTypedef;
 
 export enum Kind {
-    Namespace   = "namespace",
-    Class       = "class",
-    Enum        = "enum",
-    Interface   = "interface",
-    Typedef     = "typedef"
+    Namespace = "namespace",
+    Class     = "class",
+    Enum      = "enum",
+    Interface = "interface",
+    Typedef   = "typedef",
 }
 
 export enum Visibility {
-    Public      = "public",
-    Protected   = "protected",
-    Restricted  = "restricted",
+    Public     = "public",
+    Protected  = "protected",
+    Restricted = "restricted",
 }
 
 export interface DeprecatedInfo {
@@ -59,8 +59,8 @@ export interface SymbolNamespace {
     extends?: string;
     export?: string;
     since?: string;
-    static?: boolean;// all true
-    final?: boolean;// all true
+    static?: boolean; // all true
+    final?: boolean; // all true
     deprecated?: DeprecatedInfo;
     experimental?: ExperimentalInfo;
 }
@@ -81,12 +81,12 @@ export interface SymbolClass {
     properties?: Property[];
 
     constructor: ClassConstructor;
-    abstract?: boolean;// all true
+    abstract?: boolean; // all true
     extends?: string;
     implements?: string[];
     export?: string;
     since?: string;
-    static: boolean;// all true
+    static: boolean; // all true
     final?: boolean;
     deprecated?: DeprecatedInfo;
     experimental?: ExperimentalInfo;
@@ -109,7 +109,7 @@ export interface SymbolEnum {
 
     export?: string;
     since?: string;
-    static: boolean;// all true
+    static: boolean; // all true
     deprecated?: DeprecatedInfo;
     experimental?: ExperimentalInfo;
 }
@@ -132,7 +132,7 @@ export interface SymbolInterface {
     extends?: string;
     export?: string;
     since?: string;
-    static: boolean;// all true
+    static: boolean; // all true
     deprecated?: DeprecatedInfo;
     experimental?: ExperimentalInfo;
 }

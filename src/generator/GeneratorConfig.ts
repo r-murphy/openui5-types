@@ -1,4 +1,4 @@
-import * as UI5API from './ui5api';
+import { UI5Symbol, Property as UI5Property } from "./ui5api";
 
 export interface StringMap {
     [key: string]: string;
@@ -7,63 +7,63 @@ export interface StringMap {
 export default interface Config {
     local: {
         runLocal: boolean,
-        path:     string,
-    }
+        path: string,
+    };
 
     output: {
-        exportsPath:        string,
-        definitionsPath:    string,
-        indentation:        string,
-    },
+        exportsPath: string,
+        definitionsPath: string,
+        indentation: string,
+    };
 
     input: {
-        apiBaseUrl:     string,
-        jsonLocation:   string,
-        versions:       string[],
-        namespaces:     string[],
-    },
+        apiBaseUrl: string,
+        jsonLocation: string,
+        versions: string[],
+        namespaces: string[],
+    };
 
     references: {
         [lib: string]: string[];
-    },
+    };
 
     ignore: {
-        ignoreNamespaces:                       Set<string>,
-        ignoreMethods:                          Set<string>,
-        ignoreStaticMethods:                    Set<string>,
-        ignoreStaticProperties:                 Set<string>,
-        smartStaticMethodFixing:                Set<string>,
-        smartStaticMethodFixingAllowedMethods:  Set<string>,
-    },
+        ignoreNamespaces: Set<string>,
+        ignoreMethods: Set<string>,
+        ignoreStaticMethods: Set<string>,
+        ignoreStaticProperties: Set<string>,
+        smartStaticMethodFixing: Set<string>,
+        smartStaticMethodFixingAllowedMethods: Set<string>,
+    };
 
     additions: {
-        [library: string]: UI5API.Symbol[]
-    },
+        [library: string]: UI5Symbol[],
+    };
 
     additionalExports: [{
         path: string;
         type: string;
-    }],
+    }];
 
     additionalProperties: {
-        [parent: string]: UI5API.Property[];
-    },
+        [parent: string]: UI5Property[];
+    };
 
     replacements: {
-        global:                                 { [type: string]: string },
+        global: { [type: string]: string },
         // warnings:                            Set<string>
-        specific:   {
-            baseClass:                          { [className:   string]: string  },
-            namespaceAsType:                    { [namespace:   string]: string  },
-            propertyType:                       { [property:    string]: string  },
+        specific: {
+            baseClass: { [className: string]: string  },
+            namespaceAsType: { [namespace: string]: string  },
+            propertyType: { [property: string]: string  },
             // methods
-            methodParameterType:                { [parameter:   string]: string  },
-            methodReturnType:                   { [method:      string]: string  },
-            methodParameterOptional:            Set<string>,
-            methodVisibilityPublic:             Set<string>,
-            methodOverridesNotCompatible:       Set<string>,
-            methodReturnTypeNotThis:            Set<string>,
-            methodRemoveStaticQualifier:        Set<string>,
-        }
-    },
+            methodParameterType: { [parameter: string]: string  },
+            methodReturnType: { [method: string]: string  },
+            methodParameterOptional: Set<string>,
+            methodVisibilityPublic: Set<string>,
+            methodOverridesNotCompatible: Set<string>,
+            methodReturnTypeNotThis: Set<string>,
+            methodRemoveStaticQualifier: Set<string>,
+        },
+    };
 }

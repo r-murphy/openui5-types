@@ -1,9 +1,9 @@
 import * as ui5 from "../ui5api";
-import Config   from "../GeneratorConfig";
+import Config from "../GeneratorConfig";
 import TypeUtil from "../util/TypeUtil";
 import TreeNode from "./base/TreeNode";
 import Property from "./Property";
-import Method   from "./Method";
+import Method from "./Method";
 
 export interface ClassMaps {
     byName: Map<string, Class>;
@@ -26,59 +26,58 @@ export default class Class extends TreeNode {
 
         let baseClassReplacement = this.getReplacement(config.replacements.specific.baseClass);
 
-        this.baseClass = baseClassReplacement || (apiSymbol.extends ? TypeUtil.replaceTypes(apiSymbol.extends, config, this.fullName)  : "");
+        this.baseClass = (
+            baseClassReplacement || (apiSymbol.extends ? TypeUtil.replaceTypes(apiSymbol.extends, config, this.fullName)  : "")
+        );
 
         const properties = apiSymbol.properties || [];
         if (config.additionalProperties[this.fullName]) {
             properties.push(...config.additionalProperties[this.fullName]);
         }
         this.properties = properties
-            .map(m => new Property(this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Class));
+            .map((m) => new Property(this.config, m, this.fullName, indentationLevel + 1, ui5.Kind.Class));
 
         this.methods = Class.filterMethodSymbols(config, apiSymbol.name, apiSymbol.methods || [])
-            .map(m => new Method(config, m, this.fullName, indentationLevel + 1, ui5.Kind.Class));
+            .map((m) => new Method(config, m, this.fullName, indentationLevel + 1, ui5.Kind.Class));
 
         if (typeof(apiSymbol.constructor) === "object") {
             let constructorSymbol = Object.assign(apiSymbol.constructor, { name: "constructor" });
-            let constructor = new Method(this.config, constructorSymbol, this.fullName, indentationLevel + 1, ui5.Kind.Class)
+            let constructor = new Method(this.config, constructorSymbol, this.fullName, indentationLevel + 1, ui5.Kind.Class);
             this.methods = [constructor].concat(this.methods);
         }
     }
 
     private static filterMethodSymbols(config: Config, fullName: string, methodSymbols: ui5.Method[] = []) {
         if (config.ignore.smartStaticMethodFixing.has(fullName)) {
-            return methodSymbols.filter(m => {
+            return methodSymbols.filter((m) => {
                 if (!m.static) return true;
                 let allowed = config.ignore.smartStaticMethodFixingAllowedMethods;
                 if (allowed.has(m.name) || allowed.has(`${fullName}.${m.name}`) || allowed.has(`${fullName}.*`)) {
                     return true;
                 }
                 // non-allowed static method. see if it exists as an instance method to either remove it or fix it.
-                if (methodSymbols.some(m2 => !m2.static && m2.name === m.name)) {
+                if (methodSymbols.some((m2) => !m2.static && m2.name === m.name)) {
                     // console.log(`Removing static method ${fullName}.${m.name}`);
                     return false;
-                }
-                else {
+                } else {
                     // console.log(`Fixing static method ${fullName}.${m.name}`);
                     m.static = false;
                     return true;
                 }
             });
-        }
-        else {
+        } else {
             return methodSymbols;
         }
     }
 
     private getReplacement(obj: any): string | undefined {
-        return obj[this.fullName] || obj[`*.${this.name}`]
+        return obj[this.fullName] || obj[`*.${this.name}`];
     }
 
     public generateTypeScriptCode(output: string[]): void {
         if (this.isJQueryNamespace) {
             this.generateTypeScriptCodeJQuery(output);
-        }
-        else {
+        } else {
             this.generateTypeScriptCodeSap(output);
         }
     }
@@ -91,14 +90,14 @@ export default class Class extends TreeNode {
 
         this.printTsDoc(output, this.description);
         output.push(`${this.indentation}export class ${this.name}${extend} {\r\n`);
-        this.properties.forEach(p => p.generateTypeScriptCode(output));
-        this.methods.forEach(m => m.generateTypeScriptCode(output));
+        this.properties.forEach((p) => p.generateTypeScriptCode(output));
+        this.methods.forEach((m) => m.generateTypeScriptCode(output));
         output.push(`${this.indentation}}\r\n`);
 
         if (this.children.length) {
             // Class.sort(this.children);
             output.push(`${this.indentation}namespace ${this.name} {\r\n`);
-            this.children.forEach(c => c.generateTypeScriptCode(output));
+            this.children.forEach((c) => c.generateTypeScriptCode(output));
             output.push(`${this.indentation}}\r\n`);
         }
     }
@@ -130,7 +129,7 @@ export default class Class extends TreeNode {
             if (c1.name === "constructor") return -1;
             if (c2.name === "constructor") return 1;
             else return c1.name.localeCompare(c2.name);
-        }
+        };
 
         nodes.sort((c1, c2) => {
             for (let fn of [compareStatics, compareVisibility, compareNames]) {
@@ -143,24 +142,24 @@ export default class Class extends TreeNode {
         });
         return nodes;
     }
-    
+
     private generateTypeScriptCodeJQuery(output: string[]): void {
-        var jQueryFullName = this.getJQueryFullName();
+        let jQueryFullName = this.getJQueryFullName();
         let extend = this.baseClass ? ` extends ${this.baseClass}` : "";
 
         this.printTsDoc(output, this.description);
         output.push(`${this.indentation}declare class ${jQueryFullName}${extend} {\r\n`);
-        this.properties.forEach(p => p.generateTypeScriptCode(output));
-        this.methods.forEach(m => m.generateTypeScriptCode(output));
-        //TODO: support class children (there is only one case, it's an enum. Could be converted in a static object literal)
-        //this.children.forEach(c => c.generateTypeScriptCode(output));
+        this.properties.forEach((p) => p.generateTypeScriptCode(output));
+        this.methods.forEach((m) => m.generateTypeScriptCode(output));
+        // TODO: support class children (there is only one case, it's an enum. Could be converted in a static object literal)
+        // this.children.forEach(c => c.generateTypeScriptCode(output));
         output.push(`${this.indentation}}\r\n`);
     }
 
     public static getClassMaps(nodes: TreeNode[]): ClassMaps {
         let classMaps: ClassMaps = {
+            byBaseClass: new Map(),
             byName: new Map(),
-            byBaseClass: new Map()
         };
         Class.fillClassMaps(nodes, classMaps);
         return classMaps;
@@ -180,8 +179,8 @@ export default class Class extends TreeNode {
                     classMaps.byBaseClass.set(node.baseClass, arr);
                 }
             }
-            
-            const children = (<any>node).children;
+
+            const children = (node as any).children;
             if (children) {
                 this.fillClassMaps(children, classMaps);
             }
@@ -191,11 +190,9 @@ export default class Class extends TreeNode {
     public compare(other: Class) {
         if (this.fullName === other.baseClass) {
             return -1; // this first
-        }
-        else if (this.baseClass === other.fullName) {
+        } else if (this.baseClass === other.fullName) {
             return 1; // other first
-        }
-        else {
+        } else {
             return this.fullName.localeCompare(other.fullName);
         }
     }

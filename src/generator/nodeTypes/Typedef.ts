@@ -1,6 +1,7 @@
-import * as ui5     from "../ui5api";
-import Config       from "../GeneratorConfig";
-import TreeNode     from "./base/TreeNode";
+
+import * as ui5 from "../ui5api";
+import Config from "../GeneratorConfig";
+import TreeNode from "./base/TreeNode";
 import EnumProperty from "./EnumProperty";
 
 export default class Typedef extends TreeNode {

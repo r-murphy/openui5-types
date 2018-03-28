@@ -1,8 +1,9 @@
-import * as ui5     from "../ui5api";
-import Config       from "../GeneratorConfig";
-import TypeUtil     from "../util/TypeUtil";
-import TreeNode     from "./base/TreeNode";
-import Types        from "./Type";
+
+import * as ui5 from "../ui5api";
+import Config from "../GeneratorConfig";
+import TypeUtil from "../util/TypeUtil";
+import TreeNode from "./base/TreeNode";
+import Types from "./Type";
 
 export default class Property extends TreeNode {
 
@@ -33,7 +34,7 @@ export default class Property extends TreeNode {
         if (this.shouldIgnore()) {
             return;
         }
-        
+
         switch (this.parentKind) {
             case ui5.Kind.Namespace:
                 declaration = "var ";

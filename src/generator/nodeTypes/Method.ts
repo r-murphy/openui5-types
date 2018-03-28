@@ -1,9 +1,9 @@
-import * as ui5     from "../ui5api";
-import Config, { StringMap }       from "../GeneratorConfig";
-import TypeUtil     from "../util/TypeUtil";
-import TreeNode     from "./base/TreeNode";
-import Parameter    from "./Parameter";
-import Types        from "./Type";
+import * as ui5 from "../ui5api";
+import Config, { StringMap } from "../GeneratorConfig";
+import TypeUtil from "../util/TypeUtil";
+import TreeNode from "./base/TreeNode";
+import Parameter from "./Parameter";
+import Types from "./Type";
 import Class, { ClassMaps } from "./Class"; // Only use by type
 
 interface ReturnValue {
@@ -37,20 +37,19 @@ export default class Method extends TreeNode {
 
         if (this.getConfig(config.replacements.specific.methodVisibilityPublic)) {
             this.visibility = ui5.Visibility.Public;
-        }
-        else {
+        } else {
             this.visibility = super.replaceVisibility(method.visibility);
         }
-        
+
         this.static = method.static || false;
         this.description = method.description || "";
-        this.parameters = (method.parameters || []).map(p => new Parameter(this.config, p, this.fullName));
+        this.parameters = (method.parameters || []).map((p) => new Parameter(this.config, p, this.fullName));
         this.parentKind = parentKind;
         this.parentName = parentName;
         this.deprecated = method.deprecated;
 
         let returnTypeReplacement = this.getConfig(config.replacements.specific.methodReturnType);
-        
+
         let description = (method.returnValue && method.returnValue.description) || "";
         let returnType = returnTypeReplacement || (method.returnValue && method.returnValue.type) || (description ? "any" : "void");
         returnType = TypeUtil.replaceTypes(returnType, config, this.fullName);
@@ -67,8 +66,7 @@ export default class Method extends TreeNode {
     private getConfig(obj: StringMap | Set<string>): any | undefined {
         if (obj instanceof Set) {
             return (obj.has(this.fullName) || obj.has(`*.${this.name}`));
-        }
-        else {
+        } else {
             return obj[this.fullName] || obj[`*.${this.name}`];
         }
     }
@@ -85,7 +83,7 @@ export default class Method extends TreeNode {
             let symbol: ui5.Parameter = {
                 name: "args",
                 type: "any[]",
-                spread: true
+                spread: true,
             };
             let compatibilityParameters = [new Parameter(this.config, symbol, this.fullName)];
             let returnValue = { types: new Types("any"), description: "" };
@@ -93,9 +91,9 @@ export default class Method extends TreeNode {
             let description = [
                 `This method overload is here just for compatibility reasons to avoid compiler errors because`,
                 ` UI5 API doesn't follow all TypeScript method overload rules.\n`,
-                originalParameters.map(p => p.getTypeScriptCode()).join(", ")
+                originalParameters.map((p) => p.getTypeScriptCode()).join(", "),
             ].join("");
-            
+
             this.printMethodTsDoc(output, description, compatibilityParameters, returnValue);
             this.print(output, compatibilityParameters, returnValue);
         }
@@ -104,10 +102,10 @@ export default class Method extends TreeNode {
     /**
      * UI5 has methods where an optional parameter comes before a required one.
      * These should be written as overloads so it can be called with or without the optional.
-     * For example: 
+     * For example:
      *  attachPress(oData?, fnFunction!, oListener?)
      *  onChange(oEvent!, mParameters?, sNewValue!)
-     * 
+     *
      * There are also some methods where an optional parameter has a type and a later optional parameter has a different type or any.
      * These should eb overloaded so the different parameter can be passed in place of the first.
      * For example:
@@ -120,7 +118,7 @@ export default class Method extends TreeNode {
                 let previousIndex = i - 1;
                 let previous = parameters[previousIndex];
                 let current = parameters[i];
-                
+
                 if (previous.isOptional()) {
                     if (firstOptionalIndex === -1) {
                         firstOptionalIndex = previousIndex;
@@ -137,45 +135,41 @@ export default class Method extends TreeNode {
                         // Print it with all the parameters as required.
                         this.printMethodOverloads(output, [
                             ...beforeOptionals,
-                            ...optionals.map(p => p.asRequired()),
-                            ...afterOptionals
+                            ...optionals.map((p) => p.asRequired()),
+                            ...afterOptionals,
                         ]);
-                        
+
                         // Print it with all the optionals removed
                         this.printMethodOverloads(output, [
                             ...beforeOptionals,
-                            ...afterOptionals
+                            ...afterOptionals,
                         ]);
 
                         if (numberOfOptionals === 1) {
                             // Nothing to do.
                             return;
-                        }
-                        else if (numberOfOptionals === 2) {
+                        } else if (numberOfOptionals === 2) {
                             // Merge the optional params
                             this.printMethodOverloads(output, [
                                 ...beforeOptionals,
                                 Parameter.combine(this.config, optionals, false),
-                                ...afterOptionals
+                                ...afterOptionals,
                             ]);
-                        }
-                        else {
+                        } else {
                             if (!this.needsCompatibility) {
                                 // console.log(`Need to add compatibility for ${this.fullName}`);
                                 this.needsCompatibility = true;
                             }
                         }
                         return; // don't print the default parameters since ts doesn't allow optional before required.
-                    }
-                    else if (i === (parameters.length - 1)) {
+                    } else if (i === (parameters.length - 1)) {
                         let numberOfPreviousOptionals = i - firstOptionalIndex;
                         let beforeOptionals = parameters.filter((p, j) => (j < firstOptionalIndex));
                         if (numberOfPreviousOptionals > 1) {
                             // console.log(`Adding compatibility to ${this.fullName}`);
                             // TODO see if the params are all compatible from right to left. i.e. method(a?: any[], b?: any[], c?: any)
                             this.needsCompatibility = true;
-                        }
-                        else if (!current.isCompatible(previous)) {
+                        } else if (!current.isCompatible(previous)) {
                             // i.e. constructor(sId?: string, aSettings?: any)
                             this.printMethodOverloads(output, [
                                 ...beforeOptionals,
@@ -203,7 +197,9 @@ export default class Method extends TreeNode {
                 declaration = "";
                 break;
             case ui5.Kind.Class:
-                let visibilityModifier = this.visibility.replace(ui5.Visibility.Restricted, ui5.Visibility.Protected).replace(ui5.Visibility.Public, "");
+                let visibilityModifier = this.visibility
+                    .replace(ui5.Visibility.Restricted, ui5.Visibility.Protected)
+                    .replace(ui5.Visibility.Public, "");
                 let staticModifier = this.static ? "static " : "";
                 declaration = (visibilityModifier ? `${visibilityModifier} ` : "") + staticModifier;
                 break;
@@ -211,12 +207,13 @@ export default class Method extends TreeNode {
                 throw new Error(`UI5 kind '${this.parentKind}' cannot have methods.`);
         }
 
-        let parametersCode = parameters.map(p => p.getTypeScriptCode());
+        let parametersCode = parameters.map((p) => p.getTypeScriptCode());
         let returnTypeString = (this.name === "constructor") ? "" : `: ${returnValue.types.generateTypeScriptCode()}`;
         output.push(`${this.indentation}${declaration}${this.name}(${parametersCode.join(", ")})${returnTypeString};\r\n\r\n`);
     }
 
-    private static shouldReplaceReturnTypeWithThis(returnType: string, isStatic: boolean, parentKind: ui5.Kind, parentName: string, fullName: string, name: string, config: Config) {
+    private static shouldReplaceReturnTypeWithThis(
+        returnType: string, isStatic: boolean, parentKind: ui5.Kind, parentName: string, fullName: string, name: string, config: Config) {
         return !isStatic &&
             name !== "constructor" &&
             parentKind === ui5.Kind.Class &&
@@ -226,7 +223,7 @@ export default class Method extends TreeNode {
 
     /**
      * Called for checking if an override can be ignored.
-     * @param other 
+     * @param other
      */
     private isSameAsParent(parent: Method): boolean {
         if (this.name !== parent.name) return false;
@@ -254,18 +251,18 @@ export default class Method extends TreeNode {
     }
 
     private printMethodTsDoc(output: string[], description: string, parameters: Parameter[], returnValue: ReturnValue): void {
-        let docInfo = parameters.map(p => p.getTsDoc().replace(/\r\n|\r|\n/g, " "));
+        let docInfo = parameters.map((p) => p.getTsDoc().replace(/\r\n|\r|\n/g, " "));
 
         if (!returnValue.types.isVoid()) {
             docInfo.push(`@returns {${returnValue.types.generateTypeScriptCode()}} ${returnValue.description}`.replace(/\r\n|\r|\n/g, " "));
         }
 
         if (this.deprecated) {
-            let deprecated = [ 
+            let deprecated = [
                 "@deprecated",
-                this.deprecated.since && `Since version ${this.deprecated.since}.`, 
-                this.deprecated.text
-            ].filter(t => t).join(" ");
+                this.deprecated.since && `Since version ${this.deprecated.since}.`,
+                this.deprecated.text,
+            ].filter((t) => t).join(" ");
             docInfo.push(deprecated);
         }
 
@@ -292,13 +289,13 @@ export default class Method extends TreeNode {
         const baseClass = classes.byName.get(baseClassName);
         const subClasses = classes.byBaseClass.get(baseClassName);
         if (baseClass && subClasses) {
-            subClasses.forEach(subClass => Method.fixMethodsOverridesFor(baseClass, subClass, classes));
+            subClasses.forEach((subClass) => Method.fixMethodsOverridesFor(baseClass, subClass, classes));
         }
     }
 
     // TODO move this to methods by inspecting its parents, and change the method props back to private
     private static fixMethodsOverridesFor(baseClass: Class, subClass: Class, classes: ClassMaps): void {
-        subClass.methods.forEach(method => {
+        subClass.methods.forEach((method) => {
             const methodOverridden = Method.findMethodInBaseClassHierarchy(baseClass, method, classes);
             if (methodOverridden) {
                 const returnTypeMethod = method.returnValue.types.generateTypeScriptCode();
@@ -311,17 +308,12 @@ export default class Method extends TreeNode {
                         if (returnTypeMethod !== subClass.fullName) {
                             newReturnType = new Types(subClass.fullName); // "return this" in this case it's the subClass
                         }
-                    }
-                    // for "return somethingElse" methods
-                    else {
+                    } else {
                         newReturnType = methodOverridden.returnValue.types;
                     }
                 }
 
                 if (newReturnType && !newReturnType.isAny() && !method.returnValue.types.isThis()) {
-                    // if (!returnTypeMethodOverridden.includes("Metadata")) { // this one is too noisy
-                    //     console.log(`${method.fullName}: Replacing return type from '${method.returnValue.types}' to '${newReturnType}' to match the same method in base class '${baseClass.fullName}'.`);
-                    // }
                     method.returnValue.types = newReturnType;
                 }
 
@@ -335,9 +327,6 @@ export default class Method extends TreeNode {
                         method.ignore = true;
                         return;
                     }
-                    // else {
-                    //     console.log(`Override cannot be removed: ${method.fullName}`);
-                    // }
                 }
             }
         });
@@ -348,7 +337,10 @@ export default class Method extends TreeNode {
     private static findMethodInBaseClassHierarchy(baseClass: Class|undefined, method: Method, classes: ClassMaps): Method|undefined {
         if (!baseClass) return;
         const baseBaseClass = classes.byName.get(baseClass.baseClass);
-        return baseClass.methods.find(baseMethod => (baseMethod.name === method.name && baseMethod.static === method.static)) || Method.findMethodInBaseClassHierarchy(baseBaseClass, method, classes);
+        const nameEquals = (one: Method, two: Method) => one.name === two.name;
+        const staticEquals = (one: Method, two: Method) => one.static === two.static;
+        return baseClass.methods.find((baseMethod) => (baseMethod.name === method.name && baseMethod.static === method.static))
+            || Method.findMethodInBaseClassHierarchy(baseBaseClass, method, classes);
     }
 
     // TODO do in TypeUtil?
@@ -356,7 +348,7 @@ export default class Method extends TreeNode {
         if (baseType === subType || baseType === "void" || subType === "any" || subType === "this") {
             return true;
         }
-        
+
         const baseClass = classes.byName.get(baseType);
         let subClass = classes.byName.get(subType);
 
@@ -366,7 +358,7 @@ export default class Method extends TreeNode {
                     return true;
                 }
                 subClass = classes.byName.get(subClass.baseClass);
-            } while(subClass);
+            } while (subClass);
         }
 
         return false;
