@@ -20,11 +20,11 @@
         "jsonLocation": "designtime/api.json",
         "versions": [
             // "1.38.33", // fails on sap/f
-            // "1.44.28",
+            "1.44.28",
             // "1.48.19",
             // "1.50.9",
             "1.52.8",
-            // "1.54.1"
+            // "1.54.2"
         ],
         "namespaces": [
             "sap/ui/core",
