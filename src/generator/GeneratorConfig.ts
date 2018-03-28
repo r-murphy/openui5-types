@@ -23,6 +23,10 @@ export default interface Config {
         namespaces:     string[],
     },
 
+    references: {
+        [lib: string]: string[];
+    },
+
     ignore: {
         ignoreNamespaces:                       Set<string>,
         ignoreMethods:                          Set<string>,

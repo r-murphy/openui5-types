@@ -8,6 +8,11 @@
         "exportsPath":      "./dist/{{VERSION}}/exports/",
         "definitionsPath":  "./dist/{{VERSION}}/types/",
         "indentation":      "  ",
+        // "filemap": {
+        //     "jQuery": "jQuery.d.ts",
+        //     "sap.ui.test": "sap.ui.test.d.ts",
+        //     "sap": "sap.d.ts"
+        // }
     },
 
     "input": {
@@ -35,6 +40,13 @@
             "sap/f",
             "sap/tnt",
             "sap/uxap",
+        ]
+    },
+
+    "references": {
+        "sap": [
+            "./jQuery.d.ts",
+            "qunit"
         ]
     },
 

@@ -4,6 +4,8 @@ OpenUI5 TypeScript definitions, exports and (optional) runtime annotations.
 
 ## Release Notes
 
+**0.5.0** - Breaking: Split the dist folders into types and exports.
+
 **0.4.0** - Fork, rename and update. UI5 1.38, 1.44, 1.52, 1.54.
 
 **0.3.0** - Create definitions for more than one version of UI5 (just 1.46 and 1.48 for now). *Be careful, now that there is these definitions inside the package and I have plans to make these definitions better (normally replacing an `any` type with a more specific one), **almost all new versions from now on may be a breaking change.***
@@ -31,7 +33,7 @@ npm install openui5-types --save
 
 ### 2) Add the required TypeScript options in the tsconfig.json
 
-* Add the `sap/*` paths:
+* Add the `sap/*` path, and optionally `jquery.sap.global`.
 
 Example of `tsconfig.json` file:
 
@@ -49,14 +51,17 @@ Example of `tsconfig.json` file:
         "rootDir": "./src",
         "paths": {
         "sap/*": [
-            "./node_modules/openui5-types/dist/1.52/sap/*"
+            "./node_modules/openui5-types/dist/1.52/exports/sap/*"
+        ],
+        "jquery.sap.global": [
+            "./node_modules/openui5-types/dist/1.52/exports/jquery.sap.global.d.ts"
         ],
         "your/app/namespace/*": [
             "./src/*"
         ]
     },
     "files": [
-        "node_modules/openui5-types/dist/types/1.52/index.d.ts"
+        "node_modules/openui5-types/dist/types/1.52/types/index.d.ts"
     ],
     "include": [
         "src/**/*",
@@ -67,6 +72,8 @@ Example of `tsconfig.json` file:
     ]
 }
 ```
+
+Note: A future version may split up the large sap.d.ts, but referencing the index.d.ts file will include all of them.
 
 ### Resolving common typescript errors and module resolution problems
 

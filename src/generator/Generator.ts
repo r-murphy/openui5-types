@@ -5,6 +5,7 @@ import * as UI5API    from './ui5api';
 import TreeBuilder    from './nodeTypes/base/TreeBuilder';
 import Config         from './GeneratorConfig';
 import { getApiJson } from './util/ApiFetcher';
+import TreeNode from './nodeTypes/base/TreeNode';
 
 const versionMarker = "{{VERSION}}";
 
@@ -79,18 +80,36 @@ export default class Generator
     private createDefinitions(apiList: UI5API.API[], version: string): void
     {
         let allSymbols = apiList.map(api => api.symbols).reduce((a, b) => a.concat(b));
-        let rootNodes = TreeBuilder.createFromSymbolsArray(this.config, allSymbols);
+        let rootNodes = TreeBuilder.createFromSymbolsArray(this.config, allSymbols) as TreeNode[];
         let baseDefinitionsPath = this.config.output.definitionsPath.replace(versionMarker, version);
         let indexContent: string[] = [];
         for (let node of rootNodes) {
             let output: string[] = [];
+            this.writeReferences(output, node);
             node.generateTypeScriptCode(output);
             let filename = `${node.fullName}.d.ts`;
             this.createFile(`${baseDefinitionsPath}/${filename}`, output.join(""));
-            indexContent.push(`/// <reference path="./${filename}" />`)
+            this.writeReference(indexContent, `./${filename}`);
         }
 
-        this.createFile(`${baseDefinitionsPath}/index.d.ts`, indexContent.join("\n"));
+        this.createFile(`${baseDefinitionsPath}/index.d.ts`, indexContent.join(""));
+    }
+
+    private writeReferences(output: string[], node: TreeNode) {
+        let references = this.config.references[node.name] || [];
+        for (let reference of references) {
+            this.writeReference(output, reference);
+        }
+    }
+
+    private writeReference(output: string[], name: string) {
+        if (name.endsWith("d.ts")) {
+            output.push(`/// <reference path="${name}" />\n`)
+        }
+        else {
+            output.push(`/// <reference types="${name}" />\n`)
+        }
+        
     }
 
     private createExports(apiList: UI5API.API[], version : string): void
