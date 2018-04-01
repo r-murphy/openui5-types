@@ -50,15 +50,16 @@ Example of `tsconfig.json` file:
         "outDir": ".build/ts-out",
         "rootDir": "./src",
         "paths": {
-        "sap/*": [
-            "./node_modules/openui5-types/dist/1.52/exports/sap/*"
-        ],
-        "jquery.sap.global": [
-            "./node_modules/openui5-types/dist/1.52/exports/jquery.sap.global.d.ts"
-        ],
-        "your/app/namespace/*": [
-            "./src/*"
-        ]
+            "sap/*": [
+                "./node_modules/openui5-types/dist/1.52/exports/sap/*"
+            ],
+            "jquery.sap.global": [
+                "./node_modules/openui5-types/dist/1.52/exports/jquery.sap.global.d.ts"
+            ],
+            "your/app/namespace/*": [
+                "./src/*"
+            ]
+        }
     },
     "files": [
         "node_modules/openui5-types/dist/types/1.52/types/index.d.ts"
@@ -67,7 +68,6 @@ Example of `tsconfig.json` file:
         "src/**/*",
     ],
     "exclude": [
-        "node_modules",
         "**/*.spec.ts"
     ]
 }
