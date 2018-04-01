@@ -23,12 +23,18 @@ It is very simple, make it work with only 4 steps:
 1. Install `openui5-types`, `typescript` and `@types/jquery` npm packages
 2. Add the required TypeScript options in the tsconfig.json
 
-### 1) Install `openui5-types`, `typescript` and `@types/jquery` npm packages
+### 1) Install `openui5-types` and `@types/jquery` npm packages
 
 ```sh
+npm install openui5-types --save-dev
 npm install @types/jquery --save-dev
-npm install typescript --save-dev
-npm install openui5-types --save
+```
+
+Or with yarn:
+
+```sh
+yarn add --dev openui5-types
+yarn add --dev @types/jquery
 ```
 
 ### 2) Add the required TypeScript options in the tsconfig.json
