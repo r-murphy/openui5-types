@@ -1,11 +1,17 @@
 # openui5-types
 
-OpenUI5 TypeScript definitions, exports and (optional) runtime annotations.
+OpenUI5 TypeScript definitions and modules.
+(TODO runtime decorators).
 
-## How to use definitions and exports
+- types are exposed on the `sap` namespace (i.e. `sap.m.List`).
+- modules provide imports like `import SAPList from "sap/m/List`
+
+You can optionally use just the types, but to take full advantage of TypeScript, the modules are also recommended.
+
+## Configuring definitions and exports
 
 1. Install `openui5-types` and `@types/jquery` npm packages.
-    * Optionally add `@types/qunit` and `@types/sinon` for tests.
+    - Optionally add `@types/qunit` and `@types/sinon` for tests.
 2. Add the required TypeScript options in the tsconfig.json
 
 ### 1) Install `openui5-types` and `@types/jquery` npm packages
@@ -24,7 +30,7 @@ yarn add --dev @types/jquery
 
 ### 2) Add the required TypeScript options in the tsconfig.json
 
-* Add the `sap/*` path, and optionally `jquery.sap.global`.
+- Add the `sap/*` path, and optionally `jquery.sap.global`.
 
 Example of `tsconfig.json` file:
 
@@ -64,17 +70,43 @@ Example of `tsconfig.json` file:
 }
 ```
 
-Note: A future version may split up the large sap.d.ts, but referencing the index.d.ts file will include all of them.
+Note 1: A future version may split up the large sap.d.ts, but referencing the index.d.ts file will include all of them.
+
+Note 2: This configurations outputs ESNext modules which will require further compilation to work with UI5 and older browsers. Other configurations may be used depending on use cases.
+
+## Type Usage
+
+After the configurations, you can use the types in your code.
+
+```ts
+const list = this.byId("list") as sap.m.List;
+```
+
+## Module usage
+
+Using the modules may require either a babel compilation step after the typescript compiler runs in order to work with UI5, or a runtime library along with decorators in the code. Both of these approaches also provide a way to use and transform ES6 classes.
+
+- [babel-plugin-transform-modules-ui5](https://github.com/r-murphy/babel-plugin-transform-modules-ui5)
+- [ui5ts decorator](https://github.com/lmcarreiro/ui5ts)
+  - Note that the latest version of this project also contains UI5 types. If you just want the decorator, you can use an older version.
+
+**Disclaimer** I'm the author of the babel plugin, so I am biased towards that approach. I have not yet tried the decorator approach.
+
+You *may* be able to use `sap.ui.define` to include UI5 modules without using ES `import` syntax. But the modules will have `any` type and will need to be casted to have the most usefulness. But if this is your preference to avoid an additional compilation or runtime dependency, then give it a try.
 
 ## Example
 
-[openui5-masterdetail-app-ts](https://github.com/r-murphy/openui5-masterdetail-app-ts), which is a port of SAP's openui5-masterdetail-app.
+- [r-murphy openui5-masterdetail-app-ts](https://github.com/r-murphy/openui5-masterdetail-app-ts). Using babel/compile approach for modules.
+
+- [lmcarreiro ui5-typescript-example](https://github.com/lmcarreiro/ui5-typescript-example). Using decorator/runtime approach for modules.
+
+- [apazureck ui5-typescript-example](https://github.com/apazureck/ui5-typescript-example). Fork of lmcarreiro's example.
 
 ## Transforming ES modules and classes
 
 Check out my babel plugin [babel-plugin-transform-modules-ui5](https://github.com/r-murphy/babel-plugin-transform-modules-ui5).
 
-## Resolving common typescript errors and module resolution problems
+## Resolving common issues
 
 **Problem:** Doesn't find your own `*.ts` class:
 
@@ -123,6 +155,10 @@ import UIComponent from "sap/ui/core/UIComponent";
 ```
 
 If the problem still remains, please, create an issue in the github project.
+
+## Future Plans
+
+There is a discussion with apazureck on whether the module exports should use ES6 modules (`export default sap.Module;`) or CommonJS modules (`export = sap.Module;`). At this time on the ES6 module approach is supported by the babel plugin. But after supporting CommonJS and AMD module support in the babel plugin, this projects exports may be updated.
 
 ## Release Notes
 
