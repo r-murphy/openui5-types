@@ -304,6 +304,7 @@
                 "sap.ui.model.odata.v4.ODataModel.bindList",
                 "sap.ui.model.odata.v4.ODataModel.refresh",
                 "sap.ui.model.odata.v4.ODataPropertyBinding.refresh",
+                "sap.ui.core.Element.data",
             ]
         }
     },
