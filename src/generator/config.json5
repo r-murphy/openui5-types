@@ -20,22 +20,25 @@
         "jsonLocation": "designtime/api.json",
         "versions": [
             // "1.38.33", // fails on sap/f
-            "1.44.28",
+            // "1.44.28",
             // "1.48.19",
             // "1.50.9",
-            "1.52.8",
+            // "1.52.8",
             // "1.54.2"
+            "1.65.1"
         ],
         "namespaces": [
             "sap/ui/core",
             "sap/ui/unified",
             "sap/ui/commons",
-            "sap/ui/demokit",
-            // "sap/ui/dt",
+            // "sap/ui/demokit",
+            "sap/ui/dt",
             "sap/ui/layout",
             "sap/ui/suite",
             "sap/ui/table",
             "sap/ui/ux3",
+            "sap/ui/fl",
+            "sap/ui/codeeditor",
             "sap/m",
             "sap/f",
             "sap/tnt",
@@ -91,6 +94,10 @@
             "sap.m.NotificationListBase.setDatetime",
             "sap.m.NotificationListItem.setDatetime",
         ],
+
+        "ignoreSymbolKinds": [
+            "function"
+        ]
 
     },
 

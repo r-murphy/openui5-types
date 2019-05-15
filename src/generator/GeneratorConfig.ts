@@ -31,6 +31,7 @@ export default interface Config {
         ignoreNamespaces: Set<string>,
         ignoreMethods: Set<string>,
         ignoreStaticMethods: Set<string>,
+        ignoreSymbolKinds: Set<string>,
         ignoreStaticProperties: Set<string>,
         smartStaticMethodFixing: Set<string>,
         smartStaticMethodFixingAllowedMethods: Set<string>,
