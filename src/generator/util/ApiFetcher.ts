@@ -19,7 +19,7 @@ export async function getApiJson(config: Config, namespace: string, version: str
             console.log(`Making local file '${path}'`);
             let api = await getServerApiJson(config, namespace, version);
             fse.ensureFileSync(path);
-            fse.writeJson(path, api, {
+            fse.writeJsonSync(path, api, {
                 spaces: config.output.indentation,
             });
             return api;

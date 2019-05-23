@@ -74,6 +74,7 @@ export default class Generator {
 
     private createDefinitions(apiList: UI5API[], version: string): void {
         let allSymbols = apiList.map((api) => api.symbols).reduce((a, b) => a.concat(b));
+        allSymbols = allSymbols.filter((symbol) => !this.config.ignore.ignoreSymbolKinds.has(symbol.kind));
         let rootNodes = TreeBuilder.createFromSymbolsArray(this.config, allSymbols) as TreeNode[];
         let baseDefinitionsPath = this.config.output.definitionsPath.replace(versionMarker, version);
         let indexContent: string[] = [];
